@@ -211,7 +211,7 @@ if (conceptSchemeIri !== null) {
             @node-select="handleNodeSelect"
             @node-unselect="handleNodeUnselect"
           />
-          <pre v-if="selectedNodeTurtleValue">{{ selectedNodeTurtleValue }}</pre>
+          <pre v-if="selectedNodeTurtleValue" class="overflow-x-scroll">{{ selectedNodeTurtleValue }}</pre>
           <ProgressSpinner v-if="isTurtleCodeLoading" />
         </div>
       </AccordionTab>
