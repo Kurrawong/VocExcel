@@ -117,9 +117,11 @@ const items = [
     <p>Select a VocExcel file and upload it to convert it to a SKOS vocabulary.</p>
     
     <template v-if="!serverError">
-      <Button v-if="rdfTurtle" label="reset" @click="rdfTurtle = ''" />
       <Toast />
-
+      <div v-if="rdfTurtle" class="flex justify-between">
+        <Button  label="Reset form" @click="rdfTurtle = ''" />
+        <Button  class="p-button" icon="pi pi-download" label="Download Vocab (ttl)" @click="handleDownloadRdfTurtle"/>
+      </div>
       <FileUpload v-if="!rdfTurtle" name="upload_file" url="/api/v1/convert" :multiple="false" :auto="true" accept=".xlsx"
         :maxFileSize="100000000" :preview-width="previewWidth" :showUploadButton="false" :showCancelButton="false"
         @upload="onUploadComplete" @error="onError" :fileLimit="1">
@@ -134,14 +136,8 @@ const items = [
         <Accordion class="mt-4">
           <AccordionTab header="Total RDF Turtle result">
             <div class="flex flex-row-reverse gap-4">
-              <Button @click="handleCopyRdfTurtle" size="small">
-                <span class="pr-2">{{ copyButtonText }}</span>
-                <i class="pi pi-copy"></i>
-              </Button>
-              <Button @click="handleDownloadRdfTurtle" size="small">
-                <span class="pr-2">download</span>
-                <i class="pi pi-download"></i>
-              </Button>
+              <Button  icon="pi pi-copy" :label="copyButtonText" @click="handleCopyRdfTurtle"/>
+              <Button  icon="pi pi-download" label="Download Vocab (ttl)" @click="handleDownloadRdfTurtle"/>
             </div>
 
             <pre>{{ rdfTurtle }}</pre>
@@ -149,10 +145,5 @@ const items = [
         </Accordion>
       </div>
     </template>
-    <!-- <div class="mt-4">
-        <router-link to="/" class="no-underline">
-          <Button size="small" severity="info" outlined>Back to home</Button>
-        </router-link>
-      </div> -->
   </main>
   </template>

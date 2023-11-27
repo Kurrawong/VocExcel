@@ -18,12 +18,6 @@ import SplitButton from 'primevue/splitbutton'
     <p>We use knowledge graphs for data storage, as a transfer format, when serialised, and as inputs to advanced
       reasoning and data processing tasks, such as for <a href="https://en.wikipedia.org/wiki/Machine_learning">Machine
         Learning</a> and Articial Intelligence applications.</p>
-        <SplitButton label="Save" :model="items" icon="pi pi-plus" @click="save" rounded></SplitButton>
-<SplitButton label="Save" :model="items" icon="pi pi-plus" @click="save"  severity="secondary"></SplitButton>
-<SplitButton label="Save" :model="items" icon="pi pi-plus" @click="save"  severity="success"></SplitButton>
-<SplitButton label="Save" :model="items" icon="pi pi-plus" @click="save"  severity="info"></SplitButton>
-<SplitButton label="Save" :model="items" icon="pi pi-plus" @click="save"  severity="warning"></SplitButton>
-<SplitButton label="Save" :model="items" icon="pi pi-plus" @click="save"  severity="help"></SplitButton>
-<SplitButton label="Save" :model="items" icon="pi pi-plus" @click="save"  severity="danger"></SplitButton>
+
   </main>
 </template>
