@@ -8,7 +8,7 @@ on:
 env:
   NODE_VERSION: "18"
   PYTHON_VERSION: "3.11"
-  LAMBDA_FUNCTION_NAME: vocexcel-TBA
+  LAMBDA_FUNCTION_NAME: vocexcel
   PROJECT_NAME: "vocexcel"
 
 jobs:
