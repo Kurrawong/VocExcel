@@ -1,5 +1,4 @@
-<script setup>
-import SplitButton from 'primevue/splitbutton'
+<script setup lang="ts"> 
 </script>
 <template>
   <main>
