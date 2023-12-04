@@ -1,6 +1,7 @@
 import './assets/main.css'
 //theme
 import 'primevue/resources/themes/lara-light-blue/theme.css'
+// import 'primevue/resources/themes/fluent-light/theme.css'
 //core
 import 'primevue/resources/primevue.min.css'
 //icons

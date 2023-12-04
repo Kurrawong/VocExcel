@@ -61,19 +61,31 @@ const getChildren = (iri: string, parentNode: TreeNode) => {
   parentNode.children.push(node)
 }
 
-const getBnodeDepth = (store: Store, node: Node, depth: number = 0, seen: BlankNode[] = []) => {
-  if (node instanceof BlankNode || depth === 0) {
-    const objects = store.getObjects(node, null, null)
-    for (const o of objects) {
-      if (o instanceof BlankNode && !seen.includes(o)) {
-        seen.push(o)
-        depth = getBnodeDepth(store, o, depth + 1, seen)
-      }
-    }
+const bnodeDfs = (store: Store, node: Node, depth: number = 0): number => {
+  if (node?.termType !== "BlankNode") {
+    return depth
   }
 
-  return depth
+  let maxDepth = depth
+  store.getObjects(node, null, null).forEach(quad => {
+    if (quad.termType !== "BlankNode") {
+      return maxDepth
+    }
+    maxDepth = Math.max(maxDepth, bnodeDfs(store, quad, depth + 1))
+  })
+  return maxDepth
 }
+
+const getBnodeDepth = (store: Store, node: Node): number => {
+  let maxDepth = 0
+  store.getObjects(node, null, null).forEach(quad => {
+    if (quad.termType === "BlankNode") {
+      maxDepth = Math.max(maxDepth, bnodeDfs(store, quad, 0))
+    }
+  })
+  return maxDepth
+}
+
 
 const getConvertedRdfValue = async (ntriplesValue: string) => {
   try {
@@ -203,15 +215,9 @@ if (conceptSchemeIri !== null) {
     <Accordion class="mt-4" :activeIndex="0">
       <AccordionTab header="Vocabulary Hierarchy">
         <div class="grid grid-cols-2 gap-4">
-          <Tree
-            v-model:selectionKeys="selectedKey"
-            :value="treeNodes"
-            selectionMode="single"
-            :metaKeySelection="false"
-            @node-select="handleNodeSelect"
-            @node-unselect="handleNodeUnselect"
-          />
-          <pre v-if="selectedNodeTurtleValue">{{ selectedNodeTurtleValue }}</pre>
+          <Tree v-model:selectionKeys="selectedKey" :value="treeNodes" selectionMode="single" :metaKeySelection="false"
+            @node-select="handleNodeSelect" @node-unselect="handleNodeUnselect" />
+          <pre v-if="selectedNodeTurtleValue" class="overflow-x-scroll">{{ selectedNodeTurtleValue }}</pre>
           <ProgressSpinner v-if="isTurtleCodeLoading" />
         </div>
       </AccordionTab>

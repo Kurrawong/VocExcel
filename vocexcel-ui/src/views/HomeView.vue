@@ -15,15 +15,8 @@ import Button from 'primevue/button'
       </li>
       <li>is under active development, production use, and is commercially supported</li>
     </ul>
-    <p>
-      Source repository:
-      <a target="_blank" href="https://github.com/RDFLib/VocExcel"
-        >https://github.com/RDFLib/VocExcel</a
-      >
-    </p>
-
-    <router-link to="/convert" class="no-underline">
-      <Button size="small">Start here</Button>
+    <router-link to="/convert" class="p-button no-underline text-white">
+      Start here
     </router-link>
   </main>
 </template>
