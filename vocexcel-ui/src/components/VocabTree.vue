@@ -212,11 +212,11 @@ if (conceptSchemeIri !== null) {
 <template>
   <div v-if="treeNodes">
     <Toast />
-    <Accordion class="mt-4" :activeIndex="0">
+    <Accordion :activeIndex="0">
       <AccordionTab header="Vocabulary Hierarchy">
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-4 ">
           <Tree v-model:selectionKeys="selectedKey" :value="treeNodes" selectionMode="single" :metaKeySelection="false"
-            @node-select="handleNodeSelect" @node-unselect="handleNodeUnselect" />
+            @node-select="handleNodeSelect" @node-unselect="handleNodeUnselect" class="list-none" />
           <pre v-if="selectedNodeTurtleValue" class="overflow-x-scroll">{{ selectedNodeTurtleValue }}</pre>
           <ProgressSpinner v-if="isTurtleCodeLoading" />
         </div>

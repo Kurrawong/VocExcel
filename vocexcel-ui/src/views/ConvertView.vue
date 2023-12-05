@@ -101,49 +101,63 @@ const items = [
 
 <template>
   <main>
-      <SplitButton class="float-right" :label="`Get Template ${templateVersion}`" :model="items" icon="pi pi-download" outlined
-        @click="handleDownloadRdfTemplate">
-        <template #item="{ item }">
-          <a target="_blank" rel="nofollow" :href="item.href">{{ item.label }}</a>
-        </template>
-      </SplitButton>
+    <SplitButton class="float-right border ps-2" :label="`Get Template ${templateVersion}`" :model="items"
+      icon="pi pi-download" outlined @click="handleDownloadRdfTemplate">
+      <template #item="{ item }">
+        <a target="_blank" rel="nofollow" :href="item.href" class="ps-3 border">{{ item.label }}</a>
+      </template>
+    </SplitButton>
     <h1>Convert</h1>
     <Message v-if="serverError" severity="error" :closable="false">Error: could not contact server</Message>
-    <p>VocExcel version {{ version?version:'unknown' }}</p>
-    <p>This page allows for the conversion of supported VocExcel files to a SKOS vocabulary in turtle                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  (.ttl) format.</p>
+    <p>VocExcel version {{ version ? version : 'unknown' }}</p>
+    <p>This page allows for the conversion of supported VocExcel files to a SKOS vocabulary in turtle (.ttl) format.</p>
     <p>The currently supported VocExcel template file is {{ templateVersion }}. Download the vocexcel template file by
       clicking the button above.
     </p>
     <p>Select a VocExcel file and upload it to convert it to a SKOS vocabulary.</p>
-    
+
     <template v-if="!serverError">
       <Toast />
       <div v-if="rdfTurtle" class="flex justify-between">
-        <Button  label="Reset form" @click="rdfTurtle = ''" />
-        <Button  class="p-button" icon="pi pi-download" label="Download Vocab (ttl)" @click="handleDownloadRdfTurtle"/>
+        <Button label="Reset form" @click="rdfTurtle = ''" />
+        <Button class="p-button" icon="pi pi-download" label="Download Vocab (ttl)" @click="handleDownloadRdfTurtle" />
       </div>
-      <FileUpload v-if="!rdfTurtle" name="upload_file" url="/api/v1/convert" :multiple="false" :auto="true" accept=".xlsx"
-        :maxFileSize="100000000" :preview-width="previewWidth" :showUploadButton="false" :showCancelButton="false"
-        @upload="onUploadComplete" @error="onError" :fileLimit="1">
-        <template #empty>
-          <p>Drag and drop files to here to upload.</p>
-        </template>
-      </FileUpload>
-
+      <div v-if="!rdfTurtle" class="border rounded-md">
+        <FileUpload class="border" name="upload_file" url="/api/v1/convert" :multiple="false" :auto="true" accept=".xlsx"
+          :maxFileSize="100000000" :preview-width="previewWidth" :showUploadButton="false" :showCancelButton="false"
+          @upload="onUploadComplete" @error="onError" :fileLimit="1">
+          <template #empty>
+            <p>Drag and drop files to here to upload.</p>
+          </template>
+        </FileUpload>
+      </div>
       <div v-else>
-        <VocabTree :rdf-turtle="rdfTurtle" />
+        <div class="border rounded-md mt-4">
+          <VocabTree :rdf-turtle="rdfTurtle" />
+        </div>
+        <div class="border rounded-md mt-4">
+          <Accordion class="">
+            <AccordionTab header="Total RDF Turtle result">
+              <div class="flex flex-row-reverse gap-4">
+                <Button class="border p-2" icon="pi pi-copy" :label="copyButtonText" @click="handleCopyRdfTurtle" />
+                <Button class="border p-2" icon="pi pi-download" label="Download Vocab (ttl)"
+                  @click="handleDownloadRdfTurtle" />
+              </div>
 
-        <Accordion class="mt-4">
-          <AccordionTab header="Total RDF Turtle result">
-            <div class="flex flex-row-reverse gap-4">
-              <Button  icon="pi pi-copy" :label="copyButtonText" @click="handleCopyRdfTurtle"/>
-              <Button  icon="pi pi-download" label="Download Vocab (ttl)" @click="handleDownloadRdfTurtle"/>
-            </div>
-
-            <pre>{{ rdfTurtle }}</pre>
-          </AccordionTab>
-        </Accordion>
+              <pre>{{ rdfTurtle }}</pre>
+            </AccordionTab>
+          </Accordion>
+        </div>
       </div>
     </template>
   </main>
-  </template>
+</template>
+<style>
+ul.p-tree-container,
+ul.p-treenode-children {
+  list-style: none;
+}
+
+/* .p-fileupload.p-fileupload-advanced.p-component{
+  border: black solid 1px;
+} */</style>
