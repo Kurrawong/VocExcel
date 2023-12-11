@@ -45,8 +45,8 @@ jobs:
 
       - name: Copy UI build output to Python app
         run: |
-          rm -r ${{env.PROJECT_NAME}}/static
-          cp -r ${{env.PROJECT_NAME}}-ui/dist ${{env.PROJECT_NAME}}/static
+          rm -r ${{env.PROJECT_NAME}}/web/static
+          cp -r ${{env.PROJECT_NAME}}-ui/dist ${{env.PROJECT_NAME}}/web/static
 
       - name: Install Python dependencies
         run: poetry install
