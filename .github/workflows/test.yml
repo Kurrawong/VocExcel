@@ -40,3 +40,10 @@ jobs:
 
       - name: Run formatters in check mode
         run: task format:check
+      
+      
+      ## test app builds
+      - name: Build UI app
+        run: |
+          npm --prefix vocexcel-ui ci
+          npm --prefix vocexcel-ui run build

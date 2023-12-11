@@ -75,7 +75,8 @@ const handleDownloadRdfTurtle = () => {
   const blob = new Blob([rdfTurtle.value], { type: 'text/ttl' })
   const link = document.createElement('a')
   link.href = URL.createObjectURL(blob)
-  const name = rdfTurtle.value.split("\n")[0].match(/\<(.)*\>/g)[0]
+  const fname = rdfTurtle.value.split("\n")[0].match(/\<(.)*\>/g)??['convertedRDFdata']
+  const name= fname[0]
     .replace("<", '')
     .replace('>', '')
     .replace(/(http|https):\/\//g, '')
@@ -83,6 +84,10 @@ const handleDownloadRdfTurtle = () => {
   link.download = `${name}.ttl`
   link.click()
   URL.revokeObjectURL(link.href)
+   copyButtonText.value = copyButtonTextCopied
+      setTimeout(() => {
+        copyButtonText.value = copyButtonTextDefault
+      }, ONE_SECOND_IN_MS)
 }
 const handleDownloadRdfTemplate = () => {
   const link = document.createElement('a')

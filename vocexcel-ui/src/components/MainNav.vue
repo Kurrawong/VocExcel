@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import Menubar from 'primevue/menubar'
+// import {type MenuItem} from 'primevue'
 import Button from 'primevue/button'
-import { ref } from "vue";
+import { ref, type Ref } from "vue";
 const items = ref([
     {
         label: 'Convert',
-        to: "/convert"
+        route: "/convert"
     },
     {
         label: 'About',
-        to: "/about"
+        route: "/about"
     }
 ])
 </script>
@@ -23,7 +24,7 @@ const items = ref([
             </router-link>
         </template>
         <template #item="{ item, props, root, }">
-            <router-link :to="item.to" class="mx-2">{{ item.label }}</router-link>
+            <router-link :to="item.route!" class="mx-2">{{ item.label }}</router-link>
         </template>
         <template #end>
             <a href="https://github.com/Kurrawong/VocExcel" target="_blank" rel="noopener noreferrer"
