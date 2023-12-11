@@ -1,4 +1,4 @@
-from geochem_portal.app import create_app
+from vocexcel.web.app import create_app
 
 from mangum import Mangum
 
