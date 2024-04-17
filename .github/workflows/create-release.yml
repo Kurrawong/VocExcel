@@ -10,7 +10,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.11"
-  GIT_MAIN_BRANCH: master
+  GIT_MAIN_BRANCH: main
 
 jobs:
   release:

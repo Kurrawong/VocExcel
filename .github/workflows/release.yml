@@ -8,7 +8,7 @@ on:
 env:
   IMAGE_NAME: ghcr.io/rdflib/vocexcel
   PYTHON_VERSION: "3.11"
-  GIT_MAIN_BRANCH: master
+  GIT_MAIN_BRANCH: main
 
 jobs:
   release:
