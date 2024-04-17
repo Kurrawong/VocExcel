@@ -21,7 +21,7 @@ const ONE_SECOND_IN_MS = 1000
 const copyButtonText = ref(copyButtonTextDefault)
 const previewWidth = ref(0)
 const version = ref('...')
-const templateVersion = "0.6.2"
+const templateVersion = "0.7.0"
 const templateLink = ref(`https://github.com/Kurrawong/VocExcel/raw/main/templates/VocExcel-template-${templateVersion.replace(/\./g, '')}.xlsx`)
 onMounted(() => {
   fetch('/api/v1/version')
