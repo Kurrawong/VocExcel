@@ -4,7 +4,10 @@ import sys
 from pathlib import Path
 from typing import BinaryIO, Literal, Optional
 
-from pydantic.error_wrappers import ValidationError
+from pydantic import ValidationError
+
+THIS_FILE_PATH = Path(__file__)
+sys.path.append(str(THIS_FILE_PATH.parent.parent))
 
 try:
     import models
@@ -47,7 +50,8 @@ try:
     )
 except ImportError:
     sys.path.append("..")
-    from vocexcel import models, profiles
+    import models
+    import profiles
     from vocexcel.convert_021 import (
         extract_concepts_and_collections as extract_concepts_and_collections_021,
     )
@@ -420,6 +424,9 @@ def main(args=None):
     if args is None:  # vocexcel run via entrypoint
         args = sys.argv[1:]
 
+    if args is None or args == []:
+        raise ValueError("You must supply the path to an Excel file to convert to RDF")
+
     parser = argparse.ArgumentParser(
         prog="vocexcel", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
@@ -592,6 +599,9 @@ def main(args=None):
 
 
 if __name__ == "__main__":
-    retval = main(sys.argv[1:])
-    if retval is not None:
-        sys.exit(retval)
+    try:
+        retval = main(sys.argv[1:])
+        if retval is not None:
+            sys.exit(retval)
+    except ValueError:
+        print("You must supply a path to a file to convert")

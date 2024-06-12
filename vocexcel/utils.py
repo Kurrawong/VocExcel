@@ -12,7 +12,7 @@ from pyshacl.pytypes import GraphLike
 from rdflib import BNode, Graph, Literal, Namespace, URIRef
 from rdflib.namespace import DCAT, DCTERMS, PROV, RDF, RDFS, SDO, SKOS, XSD
 
-from vocexcel import profiles
+import profiles
 
 EXCEL_FILE_ENDINGS = ["xlsx"]
 RDF_FILE_ENDINGS = {
@@ -222,7 +222,7 @@ def make_agent(agent_value, agent_role, prefixes, iri_of_subject) -> Graph:
         DCTERMS.rightsHolder,
         SDO.creator,
         SDO.publisher,
-        SDO.rightsHolder,
+        SDO.copyrightHolder,
     ]:
         ag.add((iri_of_subject, agent_role, iri))
     else:

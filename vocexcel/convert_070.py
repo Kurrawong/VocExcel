@@ -200,6 +200,7 @@ def extract_concept_scheme(
             g.add((iri, SDO.keywords, theme))
 
     bind_namespaces(g, prefixes)
+    g.bind("", Namespace(str(iri) + "/"))
     return g, iri
 
 
@@ -263,6 +264,7 @@ def extract_concepts(sheet: Worksheet, prefixes, cs_iri) -> Graph:
         if narrower is not None:
             for n in split_and_tidy_to_iris(narrower, prefixes):
                 g.add((iri, SKOS.narrower, n))
+                g.add((n, SKOS.broader, iri))
 
         if history_note is not None:
             g.add((iri, SKOS.historyNote, Literal(history_note.strip())))

@@ -78,7 +78,8 @@ def test_extract_concept_scheme():
 def test_extract_concepts():
     wb = load_workbook(Path(__file__).parent / "060_simple.xlsx")
     prefixes = extract_prefixes(wb["Prefixes"])
-    cons = extract_concepts(wb["Concepts"], prefixes)
+    cs, cs_iri = extract_concept_scheme(wb["Concept Scheme"], prefixes)
+    cons = extract_concepts(wb["Concepts"], prefixes, cs_iri)
     expected = '''PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX ex: <http://example.com/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -122,7 +123,8 @@ ex:silkie
 def test_extract_collections():
     wb = load_workbook(Path(__file__).parent / "060_simple.xlsx")
     prefixes = extract_prefixes(wb["Prefixes"])
-    cols = extract_collections(wb["Collections"], prefixes)
+    cs, cs_iri = extract_concept_scheme(wb["Concept Scheme"], prefixes)
+    cols = extract_collections(wb["Collections"], prefixes, cs_iri)
     # print(cols.serialize(format="longturtle"))
     expected = """
         PREFIX dcterms: <http://purl.org/dc/terms/>
