@@ -130,17 +130,6 @@ def test_concept_iri():
             ],  # IRI starts ftp
         )
 
-    with pytest.raises(ValidationError) as e:
-        c = Concept(
-            uri="https://example.com/thing/x",
-            pref_label="Thing X",
-            definition="Fake def for Thing X",
-            children=[
-                "http://example.com/ working-iri",
-                "http://example.com/working-iri",
-            ],  # space in IRI
-        )
-
     # valid children, invalid related_match
     with pytest.raises(ValidationError) as e:
         c = Concept(
@@ -149,8 +138,8 @@ def test_concept_iri():
             definition="Fake def for Thing X",
             related_match=[
                 "http://example.com/working-iri/rm/1",
-                "http://example.com/working-iri/rm/ 2",  # space
-                "ftp://example.com/working-iri/rm/3",  # starts ftp
+                "http://example.com/working-iri/rm/x",  # no x
+                "ftp://example.com/working-iri/rm/3",
             ],
             children=[
                 "http://example.com/working-iri/c/1",

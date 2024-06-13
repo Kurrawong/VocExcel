@@ -42,6 +42,6 @@ def test_extract_concepts(get_excel):
     for c in cons.subjects(RDF.type, SKOS.Concept):
         concepts.append(c)
 
-    assert URIRef("http://example.com/chicken-breeds/sultan") in concepts
+    assert URIRef("http://example.com/chicken-breeds/thisisabad__-URI") in concepts
 
     assert len(concepts) == 2

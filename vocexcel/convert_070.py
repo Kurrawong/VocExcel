@@ -195,10 +195,7 @@ def extract_concepts(sheet: Worksheet, prefixes, cs_iri) -> Graph:
         if iri_s is None:
             break
 
-        iri = expand_namespaces(iri_s, prefixes)
-        iri_conv = string_is_http_iri(str(iri))
-        if not iri_conv[0]:
-            raise ConversionError(iri_conv[1])
+        iri = make_iri(iri_s, prefixes)
 
         if pref_label is None:
             raise ConversionError(

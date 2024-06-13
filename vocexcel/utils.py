@@ -150,9 +150,6 @@ def string_is_http_iri(s: str) -> Tuple[bool, str]:
                 "Check it's present in the Prefixes sheet of your workbook"
             )
 
-    if " " in s:
-        messages.append("IRIs cannot contain spaces")
-
     if len(messages) > 0:
         return False, " and ".join(messages)
     else:
@@ -238,6 +235,7 @@ def make_agent(agent_value, agent_role, prefixes, iri_of_subject) -> Graph:
 
 
 def make_iri(s: str, prefixes: dict[str, Namespace]):
+    s = make_clean_iri(s)
     iri = expand_namespaces(s, prefixes)
     iri_conv = string_is_http_iri(str(iri))
     if not iri_conv[0]:
@@ -373,3 +371,11 @@ def log_msg(result: Dict, log_file: str) -> str:
             else Fore.RED + "VIOLATION: " + Style.RESET_ALL + message
         )
     return formatted_msg
+
+
+def make_clean_iri(s: str):
+    chars = "*{}[]()>+!$ %&"
+    for c in chars:
+        s = s.replace(c, "")
+
+    return s
