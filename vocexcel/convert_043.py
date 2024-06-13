@@ -5,7 +5,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 from pydantic import ValidationError
 
 from vocexcel import models
-from vocexcel.utils import ConversionError, load_workbook, split_and_tidy_to_strings
+from vocexcel.utils import ConversionError, split_and_tidy_to_strings
 
 
 # Checking how many colon's in string

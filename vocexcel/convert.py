@@ -1,11 +1,11 @@
 import argparse
 import logging
 import sys
+import warnings
 from pathlib import Path
 from typing import BinaryIO, Literal, Optional
 
 from pydantic import ValidationError
-import warnings
 
 warnings.simplefilter(action='ignore', category=UserWarning)
 
@@ -68,6 +68,19 @@ def excel_to_rdf(
     """Converts a sheet within an Excel workbook to an RDF file"""
     wb = load_workbook(file_to_convert_path)
     template_version = get_template_version(wb)
+
+    if template_version in ["0.7.1"]:
+        return excel_to_rdf_070(
+            wb,
+            output_file_path,
+            output_format,
+            validate,
+            profile,
+            error_level,
+            message_level,
+            log_file,
+            template_version,
+        )
 
     if template_version in ["0.7.0"]:
         return excel_to_rdf_070(

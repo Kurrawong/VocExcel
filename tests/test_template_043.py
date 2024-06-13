@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 from rdflib import Graph, Literal, URIRef, compare
-from rdflib.namespace import DCTERMS, RDF, SKOS
+from rdflib.namespace import DCTERMS, SKOS
 
 sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from vocexcel import convert

@@ -5,11 +5,10 @@ from typing import Optional
 from openpyxl.workbook.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from rdflib import BNode, Graph, Literal, Namespace, URIRef
-from rdflib.namespace import DCAT, DCTERMS, OWL, PROV, RDF, RDFS, SDO, SKOS, XSD
+from rdflib.namespace import DCAT, DCTERMS, OWL, PROV, RDF, RDFS, SKOS, XSD
 
 REG = Namespace("http://purl.org/linked-data/registry#")
 
-from vocexcel import models
 from vocexcel.utils import (
     STATUSES,
     VOCDERMODS,
@@ -18,12 +17,10 @@ from vocexcel.utils import (
     bind_namespaces,
     expand_namespaces,
     id_from_iri,
-    load_workbook,
     make_agent,
     make_iri,
     split_and_tidy_to_iris,
     split_and_tidy_to_strings,
-    string_from_iri,
     string_is_http_iri,
     validate_with_profile,
 )
@@ -150,7 +147,7 @@ def extract_concept_scheme(
     if custodian is not None:
         for _custodian in split_and_tidy_to_strings(custodian):
             ISOROLES = Namespace(
-                "http://def.isotc211.org/iso19115/-1/2018/CitationAndResponsiblePartyInformation/code/CI_RoleCode/"
+                "https://linked.data.gov.au/def/data-roles/"
             )
             g += make_agent(_custodian, ISOROLES.custodian, prefixes, iri)
             g.bind("isoroles", ISOROLES)

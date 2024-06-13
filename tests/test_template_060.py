@@ -192,7 +192,7 @@ def test_rdf_to_excel(get_excel):
         PREFIX ch: <http://example.com/chickens/>
         PREFIX dcat: <http://www.w3.org/ns/dcat#>
         PREFIX ex: <http://example.com/>
-        PREFIX isoroles: <http://def.isotc211.org/iso19115/-1/2018/CitationAndResponsiblePartyInformation/code/CI_RoleCode/>
+        PREFIX isoroles: <https://linked.data.gov.au/def/data-roles/>
         PREFIX owl: <http://www.w3.org/2002/07/owl#>
         PREFIX prov: <http://www.w3.org/ns/prov#>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>

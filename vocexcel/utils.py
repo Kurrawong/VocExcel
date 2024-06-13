@@ -38,6 +38,7 @@ KNOWN_TEMPLATE_VERSIONS = [
     "0.6.2",
     "0.6.3",
     "0.7.0",
+    "0.7.1",
 ]
 LATEST_TEMPLATE = KNOWN_TEMPLATE_VERSIONS[-1]
 
@@ -207,12 +208,14 @@ def make_agent(agent_value, agent_role, prefixes, iri_of_subject) -> Graph:
     creator_iri_conv = string_is_http_iri(str(iri))
     if not creator_iri_conv[0]:
         iri = BNode()
-    if "orcid" in iri:
+
+    if "custodian" in str(agent_role) or "orcid" in iri:
         agent_type = SDO.Person
         url_email = SDO.email
     else:
         agent_type = SDO.Organization
         url_email = SDO.url
+
     ag.add((iri, RDF.type, agent_type))
     ag.add((iri, url_email, Literal("", datatype=XSD.anyURI)))
     ag.add((iri, SDO.name, Literal(string_from_iri(agent_value))))

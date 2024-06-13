@@ -7,18 +7,15 @@ from openpyxl.worksheet.worksheet import Worksheet
 from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import DCTERMS, OWL, RDF, RDFS, SKOS, XSD
 
-from vocexcel import models
 from vocexcel.utils import (
     ConversionError,
     bind_namespaces,
     expand_namespaces,
     id_from_iri,
-    load_workbook,
     make_agent,
     make_iri,
     split_and_tidy_to_iris,
     split_and_tidy_to_strings,
-    string_from_iri,
     string_is_http_iri,
     validate_with_profile,
 )
@@ -111,7 +108,7 @@ def extract_concept_scheme(sheet: Worksheet, prefixes) -> Graph:
 
     if custodian is not None:
         ISOROLES = Namespace(
-            "http://def.isotc211.org/iso19115/-1/2018/CitationAndResponsiblePartyInformation/code/CI_RoleCode/"
+            "https://linked.data.gov.au/def/data-roles/"
         )
         g += make_agent(custodian, ISOROLES.custodian, prefixes, iri)
         g.bind("isoroles", ISOROLES)

@@ -1,22 +1,18 @@
 import sys
 from pathlib import Path
+
+import pytest
 from rdflib import URIRef
 from rdflib.namespace import RDF, SKOS
 
-import pytest
-
 sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from vocexcel.convert_070 import (
-    excel_to_rdf,
-    extract_additions_concept_properties,
-    extract_collections,
     extract_concept_scheme,
     extract_concepts,
     extract_prefixes,
 )
 
-from vocexcel.utils import ConversionError
-from vocexcel.utils import expand_namespaces, load_workbook
+from vocexcel.utils import load_workbook
 
 
 TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
