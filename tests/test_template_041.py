@@ -5,27 +5,22 @@ import pytest
 from rdflib import Graph, Literal, URIRef, compare
 from rdflib.namespace import DCTERMS, SKOS
 
-sys.path.append(str(Path(__file__).parent.parent.absolute()))
+sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from vocexcel import convert
 from vocexcel.utils import ConversionError
 
-tests_dir_path = Path(__file__).parent
+TEMPLATES_DIR_PATH = Path(__file__).parent.parent.absolute() / "templates"
+TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 
 def test_empty_template():
-    assert Path(
-        Path(__file__).parent.parent / "templates" / "VocExcel-template-041.xlsx"
-    ).is_file()
-    with pytest.raises(ConversionError) as e:
-        convert.excel_to_rdf(
-            Path(__file__).parent.parent / "templates" / "VocExcel-template-041.xlsx",
-        )
-    assert "7 validation errors for ConceptScheme" in str(e)
+    with pytest.raises(ConversionError, match=".*7 validation errors for ConceptScheme.*"):
+        convert.excel_to_rdf(TEMPLATES_DIR_PATH / "VocExcel-template-041.xlsx")
 
 
 def test_simple():
     g = convert.excel_to_rdf(
-        tests_dir_path / "041_simple_valid.xlsx", output_format="graph"
+        TESTS_DATA_DIR_PATH / "041_simple_valid.xlsx", output_format="graph"
     )
     assert len(g) == 142
     assert (
@@ -45,8 +40,8 @@ def test_simple():
 
 
 def test_exhaustive_template_is_isomorphic():
-    g1 = Graph().parse(tests_dir_path / "041_exhaustive_comparison.ttl")
+    g1 = Graph().parse(TESTS_DATA_DIR_PATH / "041_exhaustive_comparison.ttl")
     g2 = convert.excel_to_rdf(
-        tests_dir_path / "041_exhaustive.xlsx", output_format="graph"
+        TESTS_DATA_DIR_PATH / "041_exhaustive.xlsx", output_format="graph"
     )
     assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"

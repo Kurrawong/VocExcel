@@ -12,7 +12,7 @@ from pyshacl.pytypes import GraphLike
 from rdflib import BNode, Graph, Literal, Namespace, URIRef
 from rdflib.namespace import DCAT, DCTERMS, PROV, RDF, RDFS, SDO, SKOS, XSD
 
-import profiles
+import vocexcel.profiles
 
 EXCEL_FILE_ENDINGS = ["xlsx"]
 RDF_FILE_ENDINGS = {

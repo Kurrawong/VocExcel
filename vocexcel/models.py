@@ -13,7 +13,7 @@ except ImportError:
     import sys
 
     sys.path.append("..")
-    from utils import all_strings_in_list_are_iris, string_is_http_iri
+    from .utils import all_strings_in_list_are_iris, string_is_http_iri
 
 ORGANISATIONS = {
     "CGI": URIRef("https://linked.data.gov.au/org/cgi"),

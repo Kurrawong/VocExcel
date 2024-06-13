@@ -5,7 +5,7 @@ from rdflib.namespace import RDF, SKOS
 
 import pytest
 
-sys.path.append(str(Path(__file__).parent.parent.absolute()))
+sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from vocexcel.convert_070 import (
     excel_to_rdf,
     extract_additions_concept_properties,
@@ -14,12 +14,17 @@ from vocexcel.convert_070 import (
     extract_concepts,
     extract_prefixes,
 )
-from vocexcel.utils import ConversionError, expand_namespaces, load_workbook
+
+from vocexcel.utils import ConversionError
+from vocexcel.utils import expand_namespaces, load_workbook
+
+
+TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 
 @pytest.fixture
 def get_excel():
-    return load_workbook(Path(__file__).parent / "070_long.xlsx")
+    return load_workbook(TESTS_DATA_DIR_PATH / "070_long.xlsx")
 
 
 def test_extract_prefixes(get_excel):

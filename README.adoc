@@ -26,7 +26,7 @@ Use one Excel workbook per vocabulary.
 
 === Latest Template
 
-* **templates/VocExcel-template-062.xlsx**
+* **templates/VocExcel-template-071.xlsx**
 
 Unless you have a good reason to do something different, please use the latest version of the template.
 
@@ -34,14 +34,15 @@ Older templates still convert, so if you've used one and like it, keep using it.
 
 === Examples
 
-Example filled-in templates versions are given in the `tests/` folder. Just ensure you're looking at examples prefixed with the same template version you are after, e.g. 0.6.0 = 060_simple.xlsx*
+Example filled-in templates versions are given in the `tests/data/` folder. Just ensure you're looking at examples prefixed with the same template version you are after, e.g. 0.6.0 = 060_simple.xlsx*
 
 == Processing
 
 To process an Excel template, you will need to either:
 
 * run the VocExcel Python script, or
-* use an Online tool
+* use an online tool
+** for example https://tools.dev.kurrawong.ai/vocexcel
 
 The Python script can also run as a Python module, i.e. within a larger Python workflow.
 
@@ -50,10 +51,9 @@ The Python script can also run as a Python module, i.e. within a larger Python w
 You will need to:
 
 1. have Python installed on your computer
-* 3.6+ required
-2. install the required packages in your environment or a virtual environment
-    * you can use the https://python-poetry.org/docs/basic-usage/[Poetry] tool with the _pyproject.toml_ file, or
-    * a `requirements.txt` file is also provided for basic Python PIP package installation
+* 3.10+ required
+2. install the required packages in your main Python environment or a virtual environment
+    * you can use the https://python-poetry.org/docs/basic-usage/[Poetry] tool with the _pyproject.toml_ file to install required Python packages
 
 === Running
 
@@ -63,6 +63,12 @@ The Python script `convert.py` in the `vocexcel/` directory can be run on Window
 
 ----
 ~$ python convert.py some-excel-file.xlsx
+----
+
+for example, using one of the test data files:
+
+----
+~$ python convert.py ../tests/data/070_long.xlsx
 ----
 
 The command line argument options can be found by typing:
@@ -106,7 +112,7 @@ optional arguments:
 
 ==== As a library
 
-The _convert.py_ file as a function that you can call to do conversions: `excel_to_rdf()`, like this:
+The _convert.py_ file uses the function `excel_to_rdf()` to do conversions, so you can directly run that function in other Python programs by importing _convert.py_, like this:
 
 ----
 from vocexcel import convert
@@ -117,7 +123,9 @@ convert.rdf_to_excel(Path(".") / "path" / "to" / "vocab-file.xlsx")
 
 ==== Online
 
-https://vocexcel.dev.kurrawong.ai
+https://kurrawong.ai[KurrawongAI] maintains an online VocExcel tool at https://vocexcel.dev.kurrawong.ai
+
+This repository also contains code to run your own online converter, see the [Vue.js] application in the _vocexcel-ui/_ folder and the Python application server in the _vocexcel/wbe/_ folder.
 
 == License
 
@@ -126,6 +134,7 @@ This code is licensed using the BSD 3-Clause. See the _LICENSE_ for the deed. No
 == Contact
 
 **Commercial support**: +
+http://docs.kurrawong.ai/vocexcel +
 info@kurrawong.ai
 
 *Lead Developer*: +

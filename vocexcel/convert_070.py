@@ -9,47 +9,24 @@ from rdflib.namespace import OWL, PROV, RDF, RDFS, SDO, SKOS, XSD
 
 REG = Namespace("http://purl.org/linked-data/registry#")
 
-try:
-    import models
-    from utils import (
-        STATUSES,
-        VOCDERMODS,
-        ConversionError,
-        add_top_concepts,
-        bind_namespaces,
-        expand_namespaces,
-        id_from_iri,
-        load_workbook,
-        make_agent,
-        make_iri,
-        split_and_tidy_to_iris,
-        split_and_tidy_to_strings,
-        string_from_iri,
-        string_is_http_iri,
-        validate_with_profile,
-    )
-except ImportError:
-    import sys
-
-    sys.path.append("..")
-    from vocexcel import models
-    from vocexcel.utils import (
-        STATUSES,
-        VOCDERMODS,
-        ConversionError,
-        add_top_concepts,
-        bind_namespaces,
-        expand_namespaces,
-        id_from_iri,
-        load_workbook,
-        make_agent,
-        make_iri,
-        split_and_tidy_to_iris,
-        split_and_tidy_to_strings,
-        string_from_iri,
-        string_is_http_iri,
-        validate_with_profile,
-    )
+from vocexcel import models
+from vocexcel.utils import (
+    STATUSES,
+    VOCDERMODS,
+    ConversionError,
+    add_top_concepts,
+    bind_namespaces,
+    expand_namespaces,
+    id_from_iri,
+    load_workbook,
+    make_agent,
+    make_iri,
+    split_and_tidy_to_iris,
+    split_and_tidy_to_strings,
+    string_from_iri,
+    string_is_http_iri,
+    validate_with_profile,
+)
 
 
 def extract_prefixes(sheet: Worksheet) -> dict[str, Namespace]:

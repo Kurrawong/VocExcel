@@ -5,98 +5,58 @@ from pathlib import Path
 from typing import BinaryIO, Literal, Optional
 
 from pydantic import ValidationError
+import warnings
+
+warnings.simplefilter(action='ignore', category=UserWarning)
 
 THIS_FILE_PATH = Path(__file__)
 sys.path.append(str(THIS_FILE_PATH.parent.parent))
 
-try:
-    import models
-    import profiles
-    from convert_021 import (
-        extract_concepts_and_collections as extract_concepts_and_collections_021,
-    )
-    from convert_030 import (
-        extract_concept_scheme as extract_concept_scheme_030,
-    )
-    from convert_030 import (
-        extract_concepts_and_collections as extract_concepts_and_collections_030,
-    )
-    from convert_040 import (
-        extract_concept_scheme as extract_concept_scheme_040,
-    )
-    from convert_040 import (
-        extract_concepts_and_collections as extract_concepts_and_collections_040,
-    )
-    from convert_043 import (
-        create_prefix_dict,
-    )
-    from convert_043 import (
-        extract_concept_scheme as extract_concept_scheme_043,
-    )
-    from convert_043 import (
-        extract_concepts_and_collections as extract_concepts_and_collections_043,
-    )
-    from convert_060 import excel_to_rdf as excel_to_rdf_060
-    from convert_063 import excel_to_rdf as excel_to_rdf_063
-    from convert_070 import excel_to_rdf as excel_to_rdf_070
-    from utils import (
-        EXCEL_FILE_ENDINGS,
-        KNOWN_FILE_ENDINGS,
-        KNOWN_TEMPLATE_VERSIONS,
-        RDF_FILE_ENDINGS,
-        ConversionError,
-        get_template_version,
-        load_workbook,
-    )
-except ImportError:
-    sys.path.append("..")
-    import models
-    import profiles
-    from vocexcel.convert_021 import (
-        extract_concepts_and_collections as extract_concepts_and_collections_021,
-    )
-    from vocexcel.convert_030 import (
-        extract_concept_scheme as extract_concept_scheme_030,
-    )
-    from vocexcel.convert_030 import (
-        extract_concepts_and_collections as extract_concepts_and_collections_030,
-    )
-    from vocexcel.convert_040 import (
-        extract_concept_scheme as extract_concept_scheme_040,
-    )
-    from vocexcel.convert_040 import (
-        extract_concepts_and_collections as extract_concepts_and_collections_040,
-    )
-    from vocexcel.convert_043 import (
-        create_prefix_dict,
-    )
-    from vocexcel.convert_043 import (
-        extract_concept_scheme as extract_concept_scheme_043,
-    )
-    from vocexcel.convert_043 import (
-        extract_concepts_and_collections as extract_concepts_and_collections_043,
-    )
-    from vocexcel.convert_060 import excel_to_rdf as excel_to_rdf_060
-    from vocexcel.convert_063 import excel_to_rdf as excel_to_rdf_063
-    from vocexcel.convert_070 import excel_to_rdf as excel_to_rdf_070
-    from vocexcel.utils import (
-        EXCEL_FILE_ENDINGS,
-        KNOWN_FILE_ENDINGS,
-        KNOWN_TEMPLATE_VERSIONS,
-        RDF_FILE_ENDINGS,
-        ConversionError,
-        get_template_version,
-        load_template,
-        load_workbook,
-        validate_with_profile,
-    )
+from vocexcel import models
+from vocexcel.convert_021 import (
+    extract_concepts_and_collections as extract_concepts_and_collections_021,
+)
+from vocexcel.convert_030 import (
+    extract_concept_scheme as extract_concept_scheme_030,
+)
+from vocexcel.convert_030 import (
+    extract_concepts_and_collections as extract_concepts_and_collections_030,
+)
+from vocexcel.convert_040 import (
+    extract_concept_scheme as extract_concept_scheme_040,
+)
+from vocexcel.convert_040 import (
+    extract_concepts_and_collections as extract_concepts_and_collections_040,
+)
+from vocexcel.convert_043 import (
+    create_prefix_dict,
+)
+from vocexcel.convert_043 import (
+    extract_concept_scheme as extract_concept_scheme_043,
+)
+from vocexcel.convert_043 import (
+    extract_concepts_and_collections as extract_concepts_and_collections_043,
+)
+from vocexcel.convert_060 import excel_to_rdf as excel_to_rdf_060
+from vocexcel.convert_063 import excel_to_rdf as excel_to_rdf_063
+from vocexcel.convert_070 import excel_to_rdf as excel_to_rdf_070
+from vocexcel.utils import (
+    EXCEL_FILE_ENDINGS,
+    KNOWN_FILE_ENDINGS,
+    RDF_FILE_ENDINGS,
+    ConversionError,
+    get_template_version,
+    load_template,
+    load_workbook,
+    validate_with_profile,
+)
 
 TEMPLATE_VERSION = None
 
 
 def excel_to_rdf(
     file_to_convert_path: Path | BinaryIO,
-    profile="vocpub-46",
+    profile="vocpub-49",
     sheet_name: Optional[str] = None,
     output_file_path: Optional[Path] = None,
     output_format: Literal["turtle", "xml", "json-ld", "graph"] = "longturtle",

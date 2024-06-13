@@ -1,11 +1,12 @@
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).parent.parent.absolute()))
+sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from rdflib import URIRef
 from rdflib.namespace import SKOS
 
 from vocexcel import convert
+TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 
 def test_example_complex():

@@ -5,25 +5,22 @@ import pytest
 from rdflib import Graph, Literal, URIRef, compare
 from rdflib.namespace import DCTERMS, SKOS
 
-sys.path.append(str(Path(__file__).parent.parent.absolute()))
+sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from vocexcel import convert
 from vocexcel.utils import ConversionError
 
+TEMPLATES_DIR_PATH = Path(__file__).parent.parent.absolute() / "templates"
+TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
+
 
 def test_empty_template():
-    assert Path(
-        Path(__file__).parent.parent / "templates" / "VocExcel-template-042.xlsx"
-    ).is_file()
-    with pytest.raises(ConversionError) as e:
-        convert.excel_to_rdf(
-            Path(__file__).parent.parent / "templates" / "VocExcel-template-042.xlsx",
-        )
-    assert "7 validation errors for ConceptScheme" in str(e)
+    with pytest.raises(ConversionError, match=".*7 validation errors for ConceptScheme.*"):
+        convert.excel_to_rdf(TEMPLATES_DIR_PATH / "VocExcel-template-042.xlsx")
 
 
 def test_simple():
     g = convert.excel_to_rdf(
-        Path(__file__).parent / "042_simple.xlsx", output_format="graph"
+        TESTS_DATA_DIR_PATH / "042_simple.xlsx", output_format="graph"
     )
     assert len(g) == 142
     assert (

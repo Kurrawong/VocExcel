@@ -1,25 +1,23 @@
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).parent.parent.absolute()))
+sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from pathlib import Path
-
 from rdflib import Graph
-
 from vocexcel import convert
 
-tests_dir_path = Path(__file__).parent
+TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 
 def test_countrycodes():
     convert.excel_to_rdf(
-        tests_dir_path / "030_languages.xlsx",
-        output_file_path=tests_dir_path / "030_languages.ttl",
+        TESTS_DATA_DIR_PATH / "030_languages.xlsx",
+        output_file_path=TESTS_DATA_DIR_PATH / "030_languages.ttl",
     )
 
     # file eg-languages-valid.ttl should have been created
-    g = Graph().parse(tests_dir_path / "030_languages.ttl")
+    g = Graph().parse(TESTS_DATA_DIR_PATH / "030_languages.ttl")
     assert len(g) == 4940
 
     # clean up
-    Path.unlink(tests_dir_path / "030_languages.ttl", missing_ok=True)
+    Path.unlink(TESTS_DATA_DIR_PATH / "030_languages.ttl", missing_ok=True)

@@ -5,24 +5,24 @@ import pytest
 from rdflib import Graph, Literal, URIRef, compare
 from rdflib.namespace import DCTERMS, RDF, SKOS
 
-sys.path.append(str(Path(__file__).parent.parent.absolute()))
+sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from vocexcel import convert
 from vocexcel.utils import ConversionError
+
+TEMPLATES_DIR_PATH = Path(__file__).parent.parent.absolute() / "templates"
+TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 
 def test_empty_template():
     with pytest.raises(ConversionError) as e:
-        convert.excel_to_rdf(
-            Path(__file__).parent.parent / "templates" / "VocExcel-template-043.xlsx"
-        )
+        convert.excel_to_rdf(TEMPLATES_DIR_PATH / "VocExcel-template-043.xlsx")
     assert "7 validation errors for ConceptScheme" in str(e)
 
 
 def test_simple():
-    tests_dir_path = Path(__file__).parent
     g = convert.excel_to_rdf(
-        tests_dir_path / "043_simple_valid.xlsx",
-        # output_file_path=tests_dir_path /"043_simple_valid_nc.ttl"
+        TESTS_DATA_DIR_PATH / "043_simple_valid.xlsx",
+        # output_file_path=TESTS_DATA_DIR_PATH /"043_simple_valid_nc.ttl"
         output_format="graph",
     )
     assert (
@@ -40,26 +40,23 @@ def test_simple():
 
 
 def test_exhaustive_template_is_isomorphic():
-    tests_dir_path = Path(__file__).parent
-    g1 = Graph().parse(tests_dir_path / "043_exhaustive.ttl")
-    g2 = convert.excel_to_rdf(
-        Path(__file__).parent / "043_exhaustive.xlsx", output_format="graph"
-    )
+    g1 = Graph().parse(TESTS_DATA_DIR_PATH / "043_exhaustive.ttl")
+    g2 = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "043_exhaustive.xlsx", output_format="graph")
     assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"
 
 
 @pytest.mark.xfail(reason="Incompatible with VocPub 3.1. Failing since 0.6.2.")
 def test_rdf_to_excel():
-    tests_dir_path = Path(__file__).parent
-    g1 = Graph().parse(tests_dir_path / "043_exhaustive.ttl")
+    TESTS_DATA_DIR_PATH = Path(__file__).parent
+    g1 = Graph().parse(TESTS_DATA_DIR_PATH / "043_exhaustive.ttl")
     convert.rdf_to_excel(
-        tests_dir_path / "043_exhaustive.ttl",
-        output_file_path=tests_dir_path / "043_exhaustive_roundtrip.xlsx",
+        TESTS_DATA_DIR_PATH / "043_exhaustive.ttl",
+        output_file_path=TESTS_DATA_DIR_PATH / "043_exhaustive_roundtrip.xlsx",
     )
     g2 = convert.excel_to_rdf(
-        tests_dir_path / "043_exhaustive.xlsx", output_format="graph"
+        TESTS_DATA_DIR_PATH / "043_exhaustive.xlsx", output_format="graph"
     )
 
     # clean up files
-    Path(tests_dir_path / "043_exhaustive_roundtrip.xlsx").unlink(missing_ok=True)
+    Path(TESTS_DATA_DIR_PATH / "043_exhaustive_roundtrip.xlsx").unlink(missing_ok=True)
     assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"

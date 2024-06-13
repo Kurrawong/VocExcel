@@ -3,15 +3,8 @@ from typing import List, Tuple
 from openpyxl.worksheet.worksheet import Worksheet
 from pydantic import ValidationError
 
-try:
-    import models
-    from utils import ConversionError, split_and_tidy_to_strings
-except ImportError:
-    import sys
-
-    sys.path.append("..")
-    from vocexcel import models
-    from vocexcel.utils import ConversionError, split_and_tidy_to_strings
+from vocexcel import models
+from vocexcel.utils import ConversionError, split_and_tidy_to_strings
 
 
 # this is a new function to iterate over the collection sheet in template version 0.4.0
