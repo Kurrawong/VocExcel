@@ -6,12 +6,13 @@ from rdflib import URIRef
 from rdflib.namespace import RDF, SKOS
 
 sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
-from vocexcel.convert_071 import extract_prefixes, extract_concept_scheme, extract_concepts
-
 from vocexcel import convert
-from vocexcel.utils import ConversionError
-from vocexcel.utils import load_workbook
-
+from vocexcel.convert_071 import (
+    extract_concept_scheme,
+    extract_concepts,
+    extract_prefixes,
+)
+from vocexcel.utils import ConversionError, load_workbook
 
 TEMPLATES_DIR_PATH = Path(__file__).parent.parent.absolute() / "templates"
 TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"

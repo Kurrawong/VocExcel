@@ -9,7 +9,7 @@ on:
         type: string
 
 env:
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: "3.12"
   GIT_MAIN_BRANCH: main
 
 jobs:

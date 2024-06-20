@@ -146,9 +146,7 @@ def extract_concept_scheme(
 
     if custodian is not None:
         for _custodian in split_and_tidy_to_strings(custodian):
-            ISOROLES = Namespace(
-                "https://linked.data.gov.au/def/data-roles/"
-            )
+            ISOROLES = Namespace("https://linked.data.gov.au/def/data-roles/")
             g += make_agent(_custodian, ISOROLES.custodian, prefixes, iri)
             g.bind("isoroles", ISOROLES)
 

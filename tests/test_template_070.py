@@ -11,9 +11,7 @@ from vocexcel.convert_070 import (
     extract_concepts,
     extract_prefixes,
 )
-
 from vocexcel.utils import load_workbook
-
 
 TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
@@ -27,7 +25,7 @@ def test_extract_prefixes(get_excel):
     wb = get_excel
     n = extract_prefixes(wb["Prefixes"])
 
-    assert n == {'ex:': 'http://example.com/'}
+    assert n == {"ex:": "http://example.com/"}
 
 
 def test_extract_concept_scheme(get_excel):
@@ -35,7 +33,9 @@ def test_extract_concept_scheme(get_excel):
     prefixes = extract_prefixes(wb["Prefixes"])
     cs, cs_iri = extract_concept_scheme(wb["Concept Scheme"], prefixes)
 
-    assert cs_iri == URIRef("https://pid.geoscience.gov.au/def/voc/ga/GeomorphologySettings")
+    assert cs_iri == URIRef(
+        "https://pid.geoscience.gov.au/def/voc/ga/GeomorphologySettings"
+    )
 
 
 def test_extract_concepts(get_excel):
@@ -48,11 +48,14 @@ def test_extract_concepts(get_excel):
     for c in cons.subjects(RDF.type, SKOS.Concept):
         concepts.append(c)
 
-    assert URIRef("https://pid.geoscience.gov.au/def/voc/ga/GeomorphologySettings/Mass_Movement_Process") in concepts
+    assert (
+        URIRef(
+            "https://pid.geoscience.gov.au/def/voc/ga/GeomorphologySettings/Mass_Movement_Process"
+        )
+        in concepts
+    )
 
     assert len(concepts) == 374
-
-
 
 
 # @pytest.mark.xfail(reason="Failing since 0.6.2.")

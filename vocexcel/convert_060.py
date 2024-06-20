@@ -107,9 +107,7 @@ def extract_concept_scheme(sheet: Worksheet, prefixes) -> Graph:
         g.add((iri, OWL.versionIRI, URIRef(iri + "/" + str(version))))
 
     if custodian is not None:
-        ISOROLES = Namespace(
-            "https://linked.data.gov.au/def/data-roles/"
-        )
+        ISOROLES = Namespace("https://linked.data.gov.au/def/data-roles/")
         g += make_agent(custodian, ISOROLES.custodian, prefixes, iri)
         g.bind("isoroles", ISOROLES)
 

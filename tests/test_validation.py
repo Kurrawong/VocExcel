@@ -7,7 +7,6 @@ from pyshacl import validate
 sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from vocexcel.convert import excel_to_rdf
 
-
 TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 
@@ -18,7 +17,9 @@ def test_validate_070_vocpub_410():
 
     excel_to_rdf(input_exel_file_path, output_file_path=output_file_path)
 
-    c, rg, rt = validate(str(output_file_path), shacl_graph=str(validator_file_path), allow_warnings=True)
+    c, rg, rt = validate(
+        str(output_file_path), shacl_graph=str(validator_file_path), allow_warnings=True
+    )
 
     os.unlink(Path(output_file_path))
 
@@ -32,10 +33,10 @@ def test_validate_071_vocpub_410():
 
     excel_to_rdf(input_exel_file_path, output_file_path=output_file_path)
 
-    c, rg, rt = validate(str(output_file_path), shacl_graph=str(validator_file_path), allow_warnings=True)
+    c, rg, rt = validate(
+        str(output_file_path), shacl_graph=str(validator_file_path), allow_warnings=True
+    )
 
     os.unlink(Path(output_file_path))
 
     assert c
-
-

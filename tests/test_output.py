@@ -6,6 +6,7 @@ from rdflib import URIRef
 from rdflib.namespace import SKOS
 
 from vocexcel import convert
+
 TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 

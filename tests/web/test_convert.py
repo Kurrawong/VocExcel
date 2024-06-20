@@ -1,6 +1,7 @@
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 from rdflib import Graph
-from pathlib import Path
 
 TESTS_DATA_DIR_PATH = Path(__file__).parent.parent.absolute() / "data"
 
