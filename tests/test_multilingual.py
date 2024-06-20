@@ -3,7 +3,9 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from pathlib import Path
+
 from rdflib import Graph
+
 from vocexcel import convert
 
 TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"

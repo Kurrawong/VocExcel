@@ -9,6 +9,15 @@ from rdflib.namespace import OWL, PROV, RDF, SDO, SKOS, XSD
 
 REG = Namespace("http://purl.org/linked-data/registry#")
 
+from vocexcel.convert_070 import excel_to_rdf as excel_to_rdf_070
+from vocexcel.convert_070 import (
+    extract_additions_concept_properties as extract_additions_concept_properties_070,
+)
+from vocexcel.convert_070 import extract_collections as extract_collections_070
+
+# from vocexcel.convert_070 import extract_concept_scheme as extract_concept_scheme_070
+from vocexcel.convert_070 import extract_concepts as extract_concepts_070
+from vocexcel.convert_070 import extract_prefixes as extract_prefixes_070
 from vocexcel.utils import (
     STATUSES,
     VOCDERMODS,
@@ -18,13 +27,6 @@ from vocexcel.utils import (
     make_iri,
     split_and_tidy_to_strings,
 )
-from vocexcel.convert_070 import excel_to_rdf as excel_to_rdf_070
-
-from vocexcel.convert_070 import extract_prefixes as extract_prefixes_070
-# from vocexcel.convert_070 import extract_concept_scheme as extract_concept_scheme_070
-from vocexcel.convert_070 import extract_concepts as extract_concepts_070
-from vocexcel.convert_070 import extract_collections as extract_collections_070
-from vocexcel.convert_070 import extract_additions_concept_properties as extract_additions_concept_properties_070
 
 
 def extract_prefixes(sheet: Worksheet):
@@ -131,9 +133,7 @@ def extract_concept_scheme(
 
     if custodian is not None:
         for _custodian in split_and_tidy_to_strings(custodian):
-            DATAROLES = Namespace(
-                "https://linked.data.gov.au/def/data-roles/"
-            )
+            DATAROLES = Namespace("https://linked.data.gov.au/def/data-roles/")
             g += make_agent(_custodian, DATAROLES.custodian, prefixes, iri)
             g.bind("DATAROLES", DATAROLES)
 
@@ -215,8 +215,3 @@ def excel_to_rdf(
         log_file=log_file,
         template_version="0.7.1",
     )
-
-
-
-
-

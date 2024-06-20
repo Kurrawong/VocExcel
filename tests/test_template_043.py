@@ -41,7 +41,9 @@ def test_simple():
 
 def test_exhaustive_template_is_isomorphic():
     g1 = Graph().parse(TESTS_DATA_DIR_PATH / "043_exhaustive.ttl")
-    g2 = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "043_exhaustive.xlsx", output_format="graph")
+    g2 = convert.excel_to_rdf(
+        TESTS_DATA_DIR_PATH / "043_exhaustive.xlsx", output_format="graph"
+    )
     assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"
 
 

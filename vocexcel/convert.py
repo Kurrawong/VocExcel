@@ -7,7 +7,7 @@ from typing import BinaryIO, Literal, Optional
 
 from pydantic import ValidationError
 
-warnings.simplefilter(action='ignore', category=UserWarning)
+warnings.simplefilter(action="ignore", category=UserWarning)
 
 THIS_FILE_PATH = Path(__file__)
 sys.path.append(str(THIS_FILE_PATH.parent.parent))

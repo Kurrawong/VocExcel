@@ -6,6 +6,7 @@ from rdflib import Graph, Literal, compare
 from rdflib.namespace import SKOS
 
 sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
+from vocexcel import convert
 from vocexcel.convert_060 import (
     excel_to_rdf,
     extract_additions_concept_properties,
@@ -14,7 +15,6 @@ from vocexcel.convert_060 import (
     extract_concepts,
     extract_prefixes,
 )
-from vocexcel import convert
 from vocexcel.utils import ConversionError, expand_namespaces, load_workbook
 
 TEMPLATES_DIR_PATH = Path(__file__).parent.parent.absolute() / "templates"
