@@ -122,7 +122,8 @@ def get_template_version(wb: Workbook) -> str:
 
 
 def split_and_tidy_to_strings(s: str):
-    # note this may not work in list of things that contain commas. Need to consider revising
+    s = str(s)
+    # TODO: this may not work in list of things that contain commas. Need to consider revising
     # to allow comma-seperated values where it'll split in commas but not in things enclosed in quotes.
     if s == "" or s is None:
         return []
