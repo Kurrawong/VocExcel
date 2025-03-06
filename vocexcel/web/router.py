@@ -37,7 +37,7 @@ async def convert_route(upload_file: UploadFile):
             print(item)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="There was an error processing the file.",
+            detail=f"There was an error processing the file: {err}",
         ) from err
 
 
