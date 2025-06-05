@@ -40,6 +40,7 @@ from vocexcel.convert_043 import (
 from vocexcel.convert_060 import excel_to_rdf as excel_to_rdf_060
 from vocexcel.convert_063 import excel_to_rdf as excel_to_rdf_063
 from vocexcel.convert_070 import excel_to_rdf as excel_to_rdf_070
+from vocexcel.convert_080 import excel_to_rdf as excel_to_rdf_080
 from vocexcel.utils import (
     EXCEL_FILE_ENDINGS,
     KNOWN_FILE_ENDINGS,
@@ -68,6 +69,19 @@ def excel_to_rdf(
     """Converts a sheet within an Excel workbook to an RDF file"""
     wb = load_workbook(file_to_convert_path)
     template_version = get_template_version(wb)
+
+    if template_version in ["0.8.0", "0.8.0.GA"]:
+        return excel_to_rdf_080(
+            wb,
+            output_file_path,
+            output_format,
+            validate,
+            profile,
+            error_level,
+            message_level,
+            log_file,
+            template_version,
+        )
 
     if template_version in ["0.7.1"]:
         return excel_to_rdf_070(
@@ -378,9 +392,9 @@ def rdf_to_excel(
             pref_label=holder["pref_label"],
             definition=holder["definition"],
             members=holder["members"],
-            provenance=holder["provenance"]
-            if holder.get("provenance") is not None
-            else None,
+            provenance=(
+                holder["provenance"] if holder.get("provenance") is not None else None
+            ),
         ).to_excel(wb, row_no)
         row_no += 1
 

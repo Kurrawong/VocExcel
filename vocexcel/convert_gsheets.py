@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal, Optional, Union
+from typing import Literal, Optional
 
 from googleapiclient.discovery import build
 from pydantic import ValidationError

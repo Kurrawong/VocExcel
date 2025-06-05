@@ -78,5 +78,20 @@ VOC_PUB_PROFILE_46 = Profile(
     is_profile_of=["https://www.w3.org/TR/skos-reference/"],
 )
 
+VOC_PUB_PROFILE_51 = Profile(
+    "https://w3id.org/profile/vocpub/5.1",
+    "Vocabulary Publication Profile v5.1",
+    "SKOS ConceptSchemes, Collections & Concepts as well as additional Dublin Core Terms & schema.org "
+    "annotation properties to be used to publish vocabularies.",
+    RDF_MEDIA_TYPES + [HTML_MEDIA_TYPE, "text/markdown"],
+    HTML_MEDIA_TYPE,
+    languages=["en"],
+    default_language="en",
+    is_profile_of=["https://www.w3.org/TR/skos-reference/"],
+)
 
-PROFILES = {"vocpub-46": VOC_PUB_PROFILE_46}
+
+PROFILES = {
+    "vocpub-46": VOC_PUB_PROFILE_46,
+    "vocpub-51": VOC_PUB_PROFILE_51,
+}

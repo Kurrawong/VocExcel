@@ -10,9 +10,7 @@ from openpyxl import load_workbook as _load_workbook
 from openpyxl.workbook.workbook import Workbook
 from pyshacl.pytypes import GraphLike
 from rdflib import BNode, Graph, Literal, Namespace, URIRef
-from rdflib.namespace import DCAT, DCTERMS, PROV, RDF, RDFS, SDO, SKOS, XSD
-
-import vocexcel.profiles
+from rdflib.namespace import DCAT, DCTERMS, PROV, RDF, SDO, SKOS, XSD
 
 EXCEL_FILE_ENDINGS = ["xlsx"]
 RDF_FILE_ENDINGS = {
@@ -39,6 +37,8 @@ KNOWN_TEMPLATE_VERSIONS = [
     "0.6.3",
     "0.7.0",
     "0.7.1",
+    "0.8.0",
+    "0.8.0.GA",
 ]
 LATEST_TEMPLATE = KNOWN_TEMPLATE_VERSIONS[-1]
 
