@@ -26,7 +26,7 @@ Use one Excel workbook per vocabulary.
 
 === Latest Template
 
-* **templates/VocExcel-template-071.xlsx**
+* **templates/VocExcel-template-080.xlsx**
 
 Unless you have a good reason to do something different, please use the latest version of the template.
 
@@ -34,7 +34,7 @@ Older templates still convert, so if you've used one and like it, keep using it.
 
 === Examples
 
-Example filled-in templates versions are given in the `tests/data/` folder. Just ensure you're looking at examples prefixed with the same template version you are after, e.g. 0.6.0 = 060_simple.xlsx*
+Example filled-in templates versions are given in the `tests/data/` folder. Just ensure you're looking at examples prefixed with the same template version you are after, e.g. 0.8.0 = 080.xlsx*
 
 == Processing
 
@@ -68,7 +68,7 @@ The Python script `convert.py` in the `vocexcel/` directory can be run on Window
 for example, using one of the test data files:
 
 ----
-~$ python convert.py ../tests/data/070_long.xlsx
+~$ python convert.py ../tests/data/080.xlsx
 ----
 
 The command line argument options can be found by typing:
@@ -139,6 +139,6 @@ info@kurrawong.ai
 
 *Lead Developer*: +
 **Nicholas Car** +
-*Data System Architect* +
+*Data Architect* +
 https://kurrawong.ai[KurrawongAI] +
 nick@kurrawong.ai
