@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "vocexcel"
-version = "0.8.2"
+version = "0.8.3"
 description = """Another Excel to RDF converter for SKOS vocabs, \
   but one that include profile-based validation of results."""
 authors = ["Nicholas Car <nick@kurrawong.ai>"]
