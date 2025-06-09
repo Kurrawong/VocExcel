@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "vocexcel"
-version = "0.8.0"
+version = "0.8.1"
 description = """Another Excel to RDF converter for SKOS vocabs, \
   but one that include profile-based validation of results."""
 authors = ["Nicholas Car <nick@kurrawong.ai>"]
@@ -37,14 +37,52 @@ httpx = "^0.24.1"
 ruff = "^0.0.277"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
 [tool.poetry.scripts]
 vocexcel = "vocexcel.convert:main"
 
 [tool.ruff]
-select = ["I001", "I002"]
+lint.select = ["I001", "I002"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+
+[project]
+authors = [
+    {name = "Nicholas Car", email = "nick@kurrawong.ai"},
+]
+requires-python = "<4.0.0,>=3.12"
+dependencies = [
+    "openpyxl<4.0.0,>=3.0.9",
+    "rdflib<8.0.0,>=7.0.0",
+    "pydantic<2.0.0,>=1.9.0",
+    "pyshacl<1.0.0,>=0.18.1",
+    "dateutils<1.0.0,>=0.6.12",
+    "colorama<1.0.0,>=0.4.4",
+    "pytest<8.0.0,>=7.2.0",
+    "setuptools<71.0.0,>=70.0.0",
+    "pipdeptree<3.0.0,>=2.3.3",
+    "jinja2<4.0.0,>=3.1.2",
+    "mangum<1.0.0,>=0.17.0",
+    "black<26.0.0,>=25.1.0",
+]
+name = "vocexcel"
+version = "0.8.1"
+description = "Another Excel to RDF converter for SKOS vocabs, but one that include profile-based validation of results."
+
+[project.scripts]
+vocexcel = "vocexcel.convert:main"
+
+[dependency-groups]
+web = [
+    "uvicorn<1.0.0,>=0.22.0",
+    "python-multipart<1.0.0,>=0.0.6",
+    "fastapi<1.0.0,>=0.104.1",
+]
+dev = [
+    "python-dotenv<2.0.0,>=1.0.0",
+    "httpx<1.0.0,>=0.24.1",
+    "ruff<1.0.0,>=0.0.277",
+]
