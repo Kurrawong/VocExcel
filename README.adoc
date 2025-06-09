@@ -34,7 +34,9 @@ Older templates still convert, so if you've used one and like it, keep using it.
 
 === Examples
 
-Example filled-in templates versions are given in the `tests/data/` folder. Just ensure you're looking at examples prefixed with the same template version you are after, e.g. 0.8.0 = 080.xlsx*
+Example filled-in templates versions are given in the `tests/data/` folder. Just ensure you're looking at examples prefixed with the same template version you are after, e.g. 0.8.0 = 080.xlsx.
+
+As per _semantic versioning_, a template of 0.8.2 will work with 0.8.0. 
 
 == Processing
 
@@ -62,19 +64,31 @@ You will need to:
 The Python script `convert.py` in the `vocexcel/` directory can be run on Windows/Unix/Linux/Mac systems like this:
 
 ----
-~$ python convert.py some-excel-file.xlsx
+python convert.py some-excel-file.xlsx
 ----
 
-for example, using one of the test data files:
+If you install this program using a Python packaging tool such as uv, then it will run like this:
 
 ----
-~$ python convert.py ../tests/data/080.xlsx
+vocexel some-excel-file.xlsx
+----
+
+An example, using one of the test data files to convert from Excel to RDF:
+
+----
+python convert.py tests/data/080.xlsx
+----
+
+To convert the other way - RDF to Excel - from with you'll get a v0.8.x template result:
+
+----
+python convert.py tests/data/080_rdf.ttl
 ----
 
 The command line argument options can be found by typing:
 
 ----
-~$ python convert.py -h
+python convert.py -h
 ----
 
 They are:

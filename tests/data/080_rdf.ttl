@@ -376,11 +376,41 @@
     skos:relatedMatch <http://example.com/fake> ;
     skos:prefLabel "duricrust"@en .
 
+:col1
+    a skos:Collection ;
+    skos:prefLabel "Collection One"@en ;
+    skos:definition "The first demonstration collection"@en ;
+    skos:member
+        :bauxitic_induration ,
+        :bauxitic_nodules ,
+        :bauxitic_partially_cemented ,
+        :calcareous_induration ,
+        :calcareous_moderately_cemented ,
+        :calcareous_nodules ,
+        :calcrete ,
+        :calcrete_bauxite ,
+        :clay_hardpan ,
+        :clay_induration ;
+    skos:historyNote "This Collection was made for VocExcel tool testing" ;
+    skos:inScheme cs: ;
+.
+
+:col2
+    a skos:Collection ;
+    skos:prefLabel "Collection Two"@en ;
+    skos:definition "The second demonstration collection"@en ;
+    skos:member
+        :silcrete ,
+        :silcrete_pods ,
+        :silcrete_sheet ;
+    skos:inScheme cs: ;
+    rdfs:isDefinedBy cs: ;
+.
+
 cs: a skos:ConceptScheme ;
     dcterms:created "2021-06-07"^^xsd:date ;
     dcterms:creator <https://linked.data.gov.au/org/ga> ;
     dcterms:modified "2021-07-13"^^xsd:date ;
-    dcterms:provenance "FGDM database"@en ;
     dcterms:publisher <https://linked.data.gov.au/org/ga> ;
     owl:versionInfo "100" ;
     skos:definition "Vocabulary of terms to describe the character of induration of rocks and regolith materials."@en ;

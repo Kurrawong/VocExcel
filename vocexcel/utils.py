@@ -7,7 +7,9 @@ from typing import Dict, Tuple, Union
 import pyshacl
 from colorama import Fore, Style
 from openpyxl import load_workbook as _load_workbook
+from openpyxl.styles import Font
 from openpyxl.workbook.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 from pyshacl.pytypes import GraphLike
 from rdflib import BNode, Graph, Literal, Namespace, Node, URIRef
 from rdflib.namespace import DCTERMS, PROV, RDF, SDO, SKOS, XSD
@@ -386,3 +388,13 @@ def xl_hyperlink(cell, s: str | Node):
     cell.value = str(s)
     cell.hyperlink = str(s)
     cell.style = "Hyperlink"
+
+
+def fill_cell_with_list_of_curies(
+    cell_id: str, ws: Worksheet, g: Graph, subj: URIRef, pred: URIRef
+):
+    xs = []
+    for x in g.objects(subject=subj, predicate=pred):
+        xs.append(x)
+    ws[cell_id] = ",\n".join([g.namespace_manager.curie(z) for z in xs])
+    ws[cell_id].font = Font(size=14)

@@ -7,7 +7,7 @@ from vocexcel.utils import STATUSES, load_workbook
 
 
 def test_basic_080():
-    RDF_FILE = Path(__file__).parent / "data" / "eg-valid-080.ttl"
+    RDF_FILE = Path(__file__).parent / "data" / "080_rdf.ttl"
     XL_FILE = RDF_FILE.with_suffix(".xlsx")
     rdf_to_excel(RDF_FILE, output_file_path=XL_FILE)
 
@@ -45,7 +45,7 @@ def test_basic_080():
 
 
 def test_basic_080GA():
-    RDF_FILE = Path(__file__).parent / "data" / "eg-valid-080GA.ttl"
+    RDF_FILE = Path(__file__).parent / "data" / "080GA_rdf.ttl"
     XL_FILE = RDF_FILE.with_suffix(".xlsx")
     rdf_to_excel(RDF_FILE, output_file_path=XL_FILE)
 

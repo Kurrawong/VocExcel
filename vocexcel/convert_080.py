@@ -28,6 +28,7 @@ from vocexcel.utils import (
     split_and_tidy_to_iris,
     split_and_tidy_to_strings,
     xl_hyperlink,
+    fill_cell_with_list_of_curies,
 )
 
 DATAROLES = Namespace("https://linked.data.gov.au/def/data-roles/")
@@ -338,6 +339,7 @@ def excel_to_rdf(
     # validate the RDF file
     shacl_graph = Graph().parse(Path(__file__).parent / "vocpub-5.1.ttl")
     v = shacl_validate(g, shacl_graph=shacl_graph, allow_warnings=True)
+    print(v[2])
     if not v[0]:
         raise ConversionError(v[2])
 
@@ -537,6 +539,23 @@ def rdf_to_excel(
             r += 1
 
     # Collections
+    ws = wb["Collections"]
+    r = 4
+    cols = sorted(list(g.subjects(predicate=RDF.type, object=SKOS.Collection)))
+    for col in cols:
+        xl_hyperlink(ws[f"A{r}"], ns.curie(col))
+        ws[f"B{r}"] = g.value(subject=col, predicate=SKOS.prefLabel)
+        ws[f"B{r}"].font = Font(size=14)
+        ws[f"C{r}"] = g.value(subject=col, predicate=SKOS.definition)
+
+        fill_cell_with_list_of_curies(f"D{r}", ws, g, col, SKOS.member)
+
+        hn = g.value(subject=col, predicate=SKOS.historyNote)
+        if hn is not None:
+            ws[f"F{r}"] = hn
+            ws[f"F{r}"].font = Font(size=14)
+
+        r += 1
 
     # Namespaces
     ws = wb["Prefixes"]
@@ -587,11 +606,3 @@ def rdf_to_excel(
         wb.save(str(output_file_path))
 
 
-def fill_cell_with_list_of_curies(
-    cell_id: str, ws: Worksheet, g: Graph, subj: URIRef, pred: URIRef
-):
-    xs = []
-    for x in g.objects(subject=subj, predicate=pred):
-        xs.append(x)
-    ws[cell_id] = ",\n".join([g.namespace_manager.curie(z) for z in xs])
-    ws[cell_id].font = Font(size=14)
