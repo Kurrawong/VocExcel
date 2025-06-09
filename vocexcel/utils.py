@@ -148,7 +148,7 @@ def string_is_http_iri(s: str) -> Tuple[bool, str]:
         )
         if ":" in s:
             messages.append(
-                f"It looks like your IRI might contain a prefix, {s.split(':')[0]+':'}, that could not be expanded. "
+                f"It looks like your IRI might contain a prefix, {s.split(':')[0] + ':'}, that could not be expanded. "
                 "Check it's present in the Prefixes sheet of your workbook"
             )
 
@@ -347,12 +347,12 @@ def log_msg(result: Dict, log_file: str) -> str:
     from rdflib.namespace import SH
 
     formatted_msg = ""
-    message = f"""Validation Result in {result['sourceConstraintComponent'].split(str(SH))[1]} ({result['sourceConstraintComponent']}):
-\tSeverity: sh:{result['resultSeverity'].split(str(SH))[1]}
-\tSource Shape: <{result['sourceShape']}>
-\tFocus Node: <{result['focusNode']}>
-\tValue Node: <{result.get('value', '')}>
-\tMessage: {result['resultMessage']}
+    message = f"""Validation Result in {result["sourceConstraintComponent"].split(str(SH))[1]} ({result["sourceConstraintComponent"]}):
+\tSeverity: sh:{result["resultSeverity"].split(str(SH))[1]}
+\tSource Shape: <{result["sourceShape"]}>
+\tFocus Node: <{result["focusNode"]}>
+\tValue Node: <{result.get("value", "")}>
+\tMessage: {result["resultMessage"]}
 """
     if result["resultSeverity"] == str(SH.Info):
         formatted_msg = (
@@ -383,7 +383,7 @@ def make_clean_iri(s: str):
     return s
 
 
-def xl_hyperlink(cell, s: str|Node):
+def xl_hyperlink(cell, s: str | Node):
     cell.value = str(s)
     cell.hyperlink = str(s)
     cell.style = "Hyperlink"

@@ -407,7 +407,6 @@ def rdf_to_excel(
 
 
 def main(args=None):
-
     if args is None:  # vocexcel run via entrypoint
         args = sys.argv[1:]
 

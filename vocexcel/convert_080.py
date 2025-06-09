@@ -349,7 +349,10 @@ def excel_to_rdf(
         else:
             return g.serialize(format=output_format)
 
-def rdf_to_excel(rdf_file: Path, output_file_path: Optional[Path] = None, template_version="0.8.0"):
+
+def rdf_to_excel(
+    rdf_file: Path, output_file_path: Optional[Path] = None, template_version="0.8.0"
+):
     # value checkers
     if not rdf_file.name.endswith(tuple(RDF_FILE_ENDINGS.keys())):
         raise ValueError(
@@ -360,12 +363,12 @@ def rdf_to_excel(rdf_file: Path, output_file_path: Optional[Path] = None, templa
 
     if output_file_path is not None:
         if not output_file_path.name.endswith(".xlsx"):
-            raise ValueError("If specifying an output_file_path, it must end with .xlsx")
+            raise ValueError(
+                "If specifying an output_file_path, it must end with .xlsx"
+            )
 
     # load the RDF file
-    g = Graph().parse(
-        str(rdf_file), format=RDF_FILE_ENDINGS[rdf_file.suffix]
-    )
+    g = Graph().parse(str(rdf_file), format=RDF_FILE_ENDINGS[rdf_file.suffix])
 
     # validate the RDF file
     shacl_graph = Graph().parse(Path(__file__).parent / "vocpub-5.1.ttl")
@@ -374,7 +377,11 @@ def rdf_to_excel(rdf_file: Path, output_file_path: Optional[Path] = None, templa
         raise ConversionError(v[2])
 
     # load the template
-    fn = "VocExcel-template-080-GA.xlsx" if template_version == "0.8.0.GA" else "VocExcel-template-080.xlsx"
+    fn = (
+        "VocExcel-template-080-GA.xlsx"
+        if template_version == "0.8.0.GA"
+        else "VocExcel-template-080.xlsx"
+    )
     wb = load_workbook(Path(__file__).parent.parent / "templates" / fn)
 
     # Concept Scheme
@@ -384,16 +391,34 @@ def rdf_to_excel(rdf_file: Path, output_file_path: Optional[Path] = None, templa
     ws["B4"] = g.value(subject=cs_iri, predicate=SKOS.prefLabel)
     ws["B5"] = g.value(subject=cs_iri, predicate=SKOS.definition)
     ws["B5"].alignment = Alignment(wrap_text=True)
-    ws["B6"] = date_parser(str(g.value(subject=cs_iri, predicate=SDO.dateCreated) or g.value(subject=cs_iri, predicate=DCTERMS.created)))
-    ws["B7"] = date_parser(str(g.value(subject=cs_iri, predicate=SDO.dateModified) or g.value(subject=cs_iri, predicate=DCTERMS.modified)))
-    xl_hyperlink(ws["B8"], g.value(subject=cs_iri, predicate=SDO.creator) or g.value(subject=cs_iri, predicate=DCTERMS.creator))
-    ws["B9"] = g.value(subject=cs_iri, predicate=SDO.publisher) or g.value(subject=cs_iri, predicate=DCTERMS.publisher)
+    ws["B6"] = date_parser(
+        str(
+            g.value(subject=cs_iri, predicate=SDO.dateCreated)
+            or g.value(subject=cs_iri, predicate=DCTERMS.created)
+        )
+    )
+    ws["B7"] = date_parser(
+        str(
+            g.value(subject=cs_iri, predicate=SDO.dateModified)
+            or g.value(subject=cs_iri, predicate=DCTERMS.modified)
+        )
+    )
+    xl_hyperlink(
+        ws["B8"],
+        g.value(subject=cs_iri, predicate=SDO.creator)
+        or g.value(subject=cs_iri, predicate=DCTERMS.creator),
+    )
+    ws["B9"] = g.value(subject=cs_iri, predicate=SDO.publisher) or g.value(
+        subject=cs_iri, predicate=DCTERMS.publisher
+    )
     # custodian
     for o in g.objects(subject=cs_iri, predicate=PROV.qualifiedAttribution):
         for p, o2 in g.predicate_objects(subject=o):
             if p == DATAROLES.custodian:
                 ws["B10"] = str(o2)
-    ws["B11"] = g.value(subject=cs_iri, predicate=SDO.version) or g.value(subject=cs_iri, predicate=OWL.versionInfo)
+    ws["B11"] = g.value(subject=cs_iri, predicate=SDO.version) or g.value(
+        subject=cs_iri, predicate=OWL.versionInfo
+    )
     ws["B12"] = g.value(subject=cs_iri, predicate=SKOS.historyNote)
     ws["B13"] = g.value(subject=cs_iri, predicate=SDO.citation)
     for o in g.objects(subject=cs_iri, predicate=PROV.qualifiedDerivation):
@@ -404,7 +429,9 @@ def rdf_to_excel(rdf_file: Path, output_file_path: Optional[Path] = None, templa
                 for k, v in VOCDERMODS.items():
                     if v == str(o2):
                         ws["B15"] = k
-    ws["B16"] = ", ".join([str(x) for x in g.objects(subject=cs_iri, predicate=SDO.keywords)])
+    ws["B16"] = ", ".join(
+        [str(x) for x in g.objects(subject=cs_iri, predicate=SDO.keywords)]
+    )
     ws["B17"] = str(g.value(subject=cs_iri, predicate=SDO.status)).split("/")[-1]
     if template_version == "0.8.0.GA":
         ws["B18"] = str(g.value(subject=cs_iri, predicate=SDO.identifier))

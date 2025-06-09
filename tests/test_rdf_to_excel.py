@@ -25,7 +25,7 @@ def test_basic_080():
         Literal("Created from GA's exiting vocab for VocExcel testing"),
     ) in g
 
-    #XL_FILE.unlink(missing_ok=True)
+    # XL_FILE.unlink(missing_ok=True)
 
 
 def test_basic_080GA():
