@@ -2,9 +2,12 @@ from pathlib import Path
 from typing import Literal as TypeLiteral
 from typing import Optional
 
+from dateutil.parser import parse as date_parser
+from openpyxl.styles import Alignment, Font
 from openpyxl.workbook.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
-from rdflib import BNode, Graph, Literal, Namespace, URIRef
+from pyshacl import validate as shacl_validate
+from rdflib import DCTERMS, BNode, Graph, Literal, Namespace, URIRef
 from rdflib.namespace import OWL, PROV, RDF, RDFS, SDO, SKOS, XSD
 
 from vocexcel.convert_070 import (
@@ -13,17 +16,21 @@ from vocexcel.convert_070 import (
 from vocexcel.convert_070 import extract_collections as extract_collections_070
 from vocexcel.convert_070 import extract_prefixes as extract_prefixes_070
 from vocexcel.utils import (
+    RDF_FILE_ENDINGS,
     STATUSES,
     VOCDERMODS,
     ConversionError,
     add_top_concepts,
     bind_namespaces,
+    load_workbook,
     make_agent,
     make_iri,
     split_and_tidy_to_iris,
     split_and_tidy_to_strings,
-    validate_with_profile,
+    xl_hyperlink,
 )
+
+DATAROLES = Namespace("https://linked.data.gov.au/def/data-roles/")
 
 
 def extract_prefixes(sheet: Worksheet):
@@ -137,7 +144,6 @@ def extract_concept_scheme(
 
     if custodian is not None:
         for _custodian in split_and_tidy_to_strings(custodian):
-            DATAROLES = Namespace("https://linked.data.gov.au/def/data-roles/")
             g += make_agent(_custodian, DATAROLES.custodian, prefixes, iri)
             g.bind("DATAROLES", DATAROLES)
 
@@ -145,7 +151,7 @@ def extract_concept_scheme(
         g.add((iri, SDO.version, Literal(str(version))))
         g.add((iri, OWL.versionIRI, URIRef(iri + "/" + str(version))))
 
-    g.add((iri, SKOS.historyNote, Literal(history_note, lang="en")))
+    g.add((iri, SKOS.historyNote, Literal(history_note)))
 
     if citation is not None:
         if str(citation).startswith("http"):
@@ -329,14 +335,11 @@ def excel_to_rdf(
     g = add_top_concepts(g)
     g.bind("cs", cs_iri)
 
-    if validate:
-        validate_with_profile(
-            g,
-            profile=profile,
-            error_level=error_level,
-            message_level=message_level,
-            log_file=log_file,
-        )
+    # validate the RDF file
+    shacl_graph = Graph().parse(Path(__file__).parent / "vocpub-5.1.ttl")
+    v = shacl_validate(g, shacl_graph=shacl_graph, allow_warnings=True)
+    if not v[0]:
+        raise ConversionError(v[2])
 
     if output_file_path is not None:
         g.serialize(destination=str(output_file_path), format=output_format)
@@ -345,3 +348,128 @@ def excel_to_rdf(
             return g
         else:
             return g.serialize(format=output_format)
+
+def rdf_to_excel(rdf_file: Path, output_file_path: Optional[Path] = None, template_version="0.8.0"):
+    # value checkers
+    if not rdf_file.name.endswith(tuple(RDF_FILE_ENDINGS.keys())):
+        raise ValueError(
+            "Files for conversion to Excel must end with one of the RDF file formats: '{}'".format(
+                "', '".join(RDF_FILE_ENDINGS.keys())
+            )
+        )
+
+    if output_file_path is not None:
+        if not output_file_path.name.endswith(".xlsx"):
+            raise ValueError("If specifying an output_file_path, it must end with .xlsx")
+
+    # load the RDF file
+    g = Graph().parse(
+        str(rdf_file), format=RDF_FILE_ENDINGS[rdf_file.suffix]
+    )
+
+    # validate the RDF file
+    shacl_graph = Graph().parse(Path(__file__).parent / "vocpub-5.1.ttl")
+    v = shacl_validate(g, shacl_graph=shacl_graph, allow_warnings=True)
+    if not v[0]:
+        raise ConversionError(v[2])
+
+    # load the template
+    fn = "VocExcel-template-080-GA.xlsx" if template_version == "0.8.0.GA" else "VocExcel-template-080.xlsx"
+    wb = load_workbook(Path(__file__).parent.parent / "templates" / fn)
+
+    # Concept Scheme
+    ws = wb["Concept Scheme"]
+    cs_iri = g.value(predicate=RDF.type, object=SKOS.ConceptScheme)
+    ws["B3"] = cs_iri
+    ws["B4"] = g.value(subject=cs_iri, predicate=SKOS.prefLabel)
+    ws["B5"] = g.value(subject=cs_iri, predicate=SKOS.definition)
+    ws["B5"].alignment = Alignment(wrap_text=True)
+    ws["B6"] = date_parser(str(g.value(subject=cs_iri, predicate=SDO.dateCreated) or g.value(subject=cs_iri, predicate=DCTERMS.created)))
+    ws["B7"] = date_parser(str(g.value(subject=cs_iri, predicate=SDO.dateModified) or g.value(subject=cs_iri, predicate=DCTERMS.modified)))
+    xl_hyperlink(ws["B8"], g.value(subject=cs_iri, predicate=SDO.creator) or g.value(subject=cs_iri, predicate=DCTERMS.creator))
+    ws["B9"] = g.value(subject=cs_iri, predicate=SDO.publisher) or g.value(subject=cs_iri, predicate=DCTERMS.publisher)
+    # custodian
+    for o in g.objects(subject=cs_iri, predicate=PROV.qualifiedAttribution):
+        for p, o2 in g.predicate_objects(subject=o):
+            if p == DATAROLES.custodian:
+                ws["B10"] = str(o2)
+    ws["B11"] = g.value(subject=cs_iri, predicate=SDO.version) or g.value(subject=cs_iri, predicate=OWL.versionInfo)
+    ws["B12"] = g.value(subject=cs_iri, predicate=SKOS.historyNote)
+    ws["B13"] = g.value(subject=cs_iri, predicate=SDO.citation)
+    for o in g.objects(subject=cs_iri, predicate=PROV.qualifiedDerivation):
+        for p, o2 in g.predicate_objects(subject=o):
+            if p == PROV.entity:
+                ws["B14"] = str(o2)
+            if p == PROV.hadRole:
+                for k, v in VOCDERMODS.items():
+                    if v == str(o2):
+                        ws["B15"] = k
+    ws["B16"] = ", ".join([str(x) for x in g.objects(subject=cs_iri, predicate=SDO.keywords)])
+    ws["B17"] = str(g.value(subject=cs_iri, predicate=SDO.status)).split("/")[-1]
+    if template_version == "0.8.0.GA":
+        ws["B18"] = str(g.value(subject=cs_iri, predicate=SDO.identifier))
+
+    # Concepts - basic properties
+    ws = wb["Concepts"]
+
+    r = 4
+    cs = sorted(list(g.subjects(predicate=RDF.type, object=SKOS.Concept)))
+    for c in cs:
+        xl_hyperlink(ws[f"A{r}"], c)
+        ws[f"B{r}"] = g.value(subject=c, predicate=SKOS.prefLabel)
+        ws[f"B{r}"].font = Font(size=14)
+        ws[f"C{r}"] = g.value(subject=c, predicate=SKOS.definition)
+        ws[f"C{r}"].alignment = Alignment(wrap_text=True)
+        ws[f"C{r}"].font = Font(size=14)
+
+        alt_labels = []
+        for alt_label in g.objects(subject=c, predicate=SKOS.altLabel):
+            alt_labels.append(alt_label)
+        ws[f"D{r}"] = ",\n".join(alt_labels)
+        ws[f"D{r}"].font = Font(size=14)
+
+        narrowers = []
+        for s, o in g.subject_objects(SKOS.broader):
+            g.add((o, SKOS.narrower, s))
+        for narrower in g.objects(subject=c, predicate=SKOS.narrower):
+            narrowers.append(narrower)
+        ws[f"E{r}"] = ",\n".join(narrowers)
+        ws[f"E{r}"].font = Font(size=14)
+
+        hn = g.value(subject=c, predicate=SKOS.historyNote)
+        if hn is not None:
+            ws[f"F{r}"] = hn
+            ws[f"F{r}"].font = Font(size=14)
+
+        cit = g.value(subject=c, predicate=SDO.citation)
+        if cit is not None:
+            ws[f"G{r}"] = hn
+            ws[f"G{r}"].font = Font(size=14)
+
+        is_defined_by = g.value(subject=c, predicate=RDFS.isDefinedBy)
+        if is_defined_by != "" and is_defined_by != cs_iri:
+            xl_hyperlink(ws[f"H{r}"], is_defined_by)
+
+        status = g.value(subject=c, predicate=SDO.status)
+        if status is not None:
+            for k, v in STATUSES.items():
+                if v == str(status):
+                    ws[f"I{r}"] = k
+                    ws[f"I{r}"].font = Font(size=14)
+
+        eg = g.value(subject=c, predicate=SKOS.example)
+        if eg is not None:
+            ws[f"J{r}"] = eg
+            ws[f"J{r}"].font = Font(size=14)
+
+        img = g.value(subject=c, predicate=SDO.image)
+        if img is not None:
+            xl_hyperlink(ws[f"K{r}"], img)
+
+        r += 1
+
+    # save the output
+    if output_file_path is None:
+        wb.save(str(rdf_file.with_suffix(".xlsx")))
+    else:
+        wb.save(str(output_file_path))

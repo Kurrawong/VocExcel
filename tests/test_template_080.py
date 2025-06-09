@@ -12,8 +12,7 @@ TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 
 def test_080():
-    rdf_txt = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "080.xlsx")
-    g = Graph().parse(data=rdf_txt, format="turtle")
+    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "080.xlsx", output_format="graph")
 
     assert (
         URIRef("http://example.com/voc/myvoc"),
@@ -44,8 +43,7 @@ def test_080():
 
 
 def test_080GA():
-    rdf_txt = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "080GA.xlsx")
-    g = Graph().parse(data=rdf_txt, format="turtle")
+    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "080GA.xlsx", output_format="graph")
 
     assert (
         URIRef("http://example.com/voc/myvoc"),

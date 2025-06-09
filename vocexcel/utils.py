@@ -8,9 +8,10 @@ import pyshacl
 from colorama import Fore, Style
 from openpyxl import load_workbook as _load_workbook
 from openpyxl.workbook.workbook import Workbook
+from openpyxl.worksheet.hyperlink import Hyperlink
 from pyshacl.pytypes import GraphLike
-from rdflib import BNode, Graph, Literal, Namespace, URIRef
-from rdflib.namespace import DCAT, DCTERMS, PROV, RDF, SDO, SKOS, XSD
+from rdflib import BNode, Graph, Literal, Namespace, Node, URIRef
+from rdflib.namespace import DCTERMS, PROV, RDF, SDO, SKOS, XSD
 
 EXCEL_FILE_ENDINGS = ["xlsx"]
 RDF_FILE_ENDINGS = {
@@ -230,7 +231,7 @@ def make_agent(agent_value, agent_role, prefixes, iri_of_subject) -> Graph:
         qa = BNode()
         ag.add((iri_of_subject, PROV.qualifiedAttribution, qa))
         ag.add((qa, PROV.agent, iri))
-        ag.add((qa, DCAT.hadRole, agent_role))
+        ag.add((qa, PROV.hadRole, agent_role))
 
     return ag
 
@@ -380,3 +381,9 @@ def make_clean_iri(s: str):
         s = s.replace(c, "")
 
     return s
+
+
+def xl_hyperlink(cell, s: str|Node):
+    cell.value = str(s)
+    cell.hyperlink = str(s)
+    cell.style = "Hyperlink"
