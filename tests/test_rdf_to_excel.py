@@ -13,6 +13,7 @@ def test_basic_080():
 
     g = excel_to_rdf(load_workbook(XL_FILE), output_format="graph")
     # g.serialize(destination=RDF_FILE.with_suffix(".2.ttl"), format="longturtle")
+
     assert (
         URIRef("https://linked.data.gov.au/def/induration-style"),
         SDO.status,
@@ -25,7 +26,22 @@ def test_basic_080():
         Literal("Created from GA's exiting vocab for VocExcel testing"),
     ) in g
 
-    # XL_FILE.unlink(missing_ok=True)
+    assert (
+        URIRef("https://linked.data.gov.au/def/induration-style/duricrust"),
+        SKOS.relatedMatch,
+        URIRef("http://example.com/fake"),
+    ) in g
+
+    assert (
+        URIRef("https://linked.data.gov.au/def/induration-style/bauxitic_nodules"),
+        SKOS.notation,
+        Literal(
+            "NO10",
+            datatype=URIRef("https://linked.data.gov.au/def/induration-style/gaId"),
+        ),
+    ) in g
+
+    XL_FILE.unlink(missing_ok=True)
 
 
 def test_basic_080GA():

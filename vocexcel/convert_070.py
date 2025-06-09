@@ -29,11 +29,12 @@ def extract_prefixes(sheet: Worksheet) -> dict[str, Namespace]:
     prefixes = {}
     i = 3
     while True:
-        pre = sheet[f"A{i}"].value
-        if pre is None:
+        ns = sheet[f"B{i}"].value
+        if ns is None:
             break
         else:
-            proper_pre = str(pre) if str(pre).endswith(":") else str(pre) + ":"
+            pre = sheet[f"A{i}"].value
+            proper_pre = str(pre).strip(":") + ":" if pre is not None else ":"
             prefixes[proper_pre] = sheet[f"B{i}"].value
 
         i += 1
@@ -330,6 +331,7 @@ def extract_additions_concept_properties(sheet: Worksheet, prefixes) -> Graph:
 
         # create Graph
         iri = make_iri(iri_s, prefixes)
+
         if related_s is not None:
             related = make_iri(related_s, prefixes)
             g.add((iri, SKOS.relatedMatch, related))
@@ -351,17 +353,20 @@ def extract_additions_concept_properties(sheet: Worksheet, prefixes) -> Graph:
             g.add((iri, SKOS.broadMatch, broad))
 
         if notation_s is not None:
+            notations = split_and_tidy_to_strings(notation_s)
             if notation_type_s is not None:
-                notation_type = make_iri(notation_type_s, prefixes)
+                notation_types = split_and_tidy_to_iris(notation_type_s, prefixes)
             else:
-                notation_type = XSD.token
-            g.add(
-                (
-                    iri,
-                    SKOS.notation,
-                    Literal(notation_s, datatype=notation_type),
+                notation_types = [XSD.token for x in notations]
+
+            for j, notation in enumerate(notations):
+                g.add(
+                    (
+                        iri,
+                        SKOS.notation,
+                        Literal(notation, datatype=notation_types[j]),
+                    )
                 )
-            )
 
     bind_namespaces(g, prefixes)
     return g

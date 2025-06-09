@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from rdflib import Graph, Literal, URIRef
-from rdflib.namespace import SDO, XSD
+from rdflib.namespace import SDO, SKOS, XSD
 
 sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from vocexcel import convert

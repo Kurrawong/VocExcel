@@ -3,27 +3,20 @@
 version: "3"
 
 tasks:
-  install:
-    desc: Install project and dependencies.
+  check:
+    desc: Check Python code.
     cmds:
-      - poetry install --no-interaction --no-root
+      - ruff check --fix
 
   format:
     desc: Format Python code.
     cmds:
-      - poetry run ruff check --fix vocexcel tests
-      - poetry run black vocexcel tests
-
-  format:check:
-    desc: Run formatters in check mode. Does not apply formatting.
-    cmds:
-      - poetry run ruff check vocexcel tests
-      - poetry run black --check vocexcel tests
+      - ruff format
 
   test:
     desc: Run tests
     cmds:
-      - poetry run pytest
+      - pytest
 
   run:
     desc: Run Python dev server

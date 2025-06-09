@@ -314,13 +314,13 @@ def excel_to_rdf(
     output_format: TypeLiteral[
         "longturtle", "turtle", "xml", "json-ld", "graph"
     ] = "longturtle",
-    validate: bool = False,
-    profile="vocpub-51",
-    error_level=1,
-    message_level=1,
-    log_file: Optional[Path] = None,
     template_version="0.8.0",
 ):
+    if template_version not in ["0.8.0", "0.8.0.GA"]:
+        raise ValueError(
+            f"This converter can only handle templates with versions 0.8.0 or 0.8.0.GA, not {template_version}"
+        )
+
     prefixes = extract_prefixes(wb["Prefixes"])
     cs, cs_iri = extract_concept_scheme(
         wb["Concept Scheme"], prefixes, template_version
@@ -342,7 +342,7 @@ def excel_to_rdf(
         raise ConversionError(v[2])
 
     if output_file_path is not None:
-        g.serialize(destination=str(output_file_path), format=output_format)
+        g.serialize(destination=str(output_file_path), format="longturtle")
     else:  # print to std out
         if output_format == "graph":
             return g
@@ -362,13 +362,20 @@ def rdf_to_excel(
         )
 
     if output_file_path is not None:
-        if not output_file_path.name.endswith(".xlsx"):
+        if not output_file_path.suffix == ".xlsx":
             raise ValueError(
                 "If specifying an output_file_path, it must end with .xlsx"
             )
 
+    if template_version not in ["0.8.0", "0.8.0.GA"]:
+        raise ValueError(
+            f"This converter can only handle templates with versions 0.8.0 or 0.8.0.GA, not {template_version}"
+        )
+
     # load the RDF file
     g = Graph().parse(str(rdf_file), format=RDF_FILE_ENDINGS[rdf_file.suffix])
+    g.bind("ex", "http://example.com/")
+    ns = g.namespace_manager
 
     # validate the RDF file
     shacl_graph = Graph().parse(Path(__file__).parent / "vocpub-5.1.ttl")
@@ -436,13 +443,12 @@ def rdf_to_excel(
     if template_version == "0.8.0.GA":
         ws["B18"] = str(g.value(subject=cs_iri, predicate=SDO.identifier))
 
-    # Concepts - basic properties
+    # Concepts
     ws = wb["Concepts"]
-
     r = 4
     cs = sorted(list(g.subjects(predicate=RDF.type, object=SKOS.Concept)))
     for c in cs:
-        xl_hyperlink(ws[f"A{r}"], c)
+        xl_hyperlink(ws[f"A{r}"], ns.curie(c))
         ws[f"B{r}"] = g.value(subject=c, predicate=SKOS.prefLabel)
         ws[f"B{r}"].font = Font(size=14)
         ws[f"C{r}"] = g.value(subject=c, predicate=SKOS.definition)
@@ -455,12 +461,12 @@ def rdf_to_excel(
         ws[f"D{r}"] = ",\n".join(alt_labels)
         ws[f"D{r}"].font = Font(size=14)
 
-        narrowers = []
         for s, o in g.subject_objects(SKOS.broader):
             g.add((o, SKOS.narrower, s))
+        narrowers = []
         for narrower in g.objects(subject=c, predicate=SKOS.narrower):
             narrowers.append(narrower)
-        ws[f"E{r}"] = ",\n".join(narrowers)
+        ws[f"E{r}"] = ",\n".join([ns.curie(x) for x in narrowers])
         ws[f"E{r}"].font = Font(size=14)
 
         hn = g.value(subject=c, predicate=SKOS.historyNote)
@@ -495,8 +501,97 @@ def rdf_to_excel(
 
         r += 1
 
+    r = 4
+    cs = sorted(list(g.subjects(predicate=RDF.type, object=SKOS.Concept)))
+    for c in cs:
+        # Concepts - Additional Properties
+        if (
+            c,
+            SKOS.relatedMatch
+            | SKOS.closeMatch
+            | SKOS.exactMatch
+            | SKOS.narrowMatch
+            | SKOS.broadMatch
+            | SKOS.notation,
+            None,
+        ) in g:
+            ws = wb["Additional Concept Properties"]
+            xl_hyperlink(ws[f"A{r}"], ns.curie(c))
+
+            fill_cell_with_list_of_curies(f"B{r}", ws, g, c, SKOS.relatedMatch)
+            fill_cell_with_list_of_curies(f"C{r}", ws, g, c, SKOS.closeMatch)
+            fill_cell_with_list_of_curies(f"D{r}", ws, g, c, SKOS.exactMatch)
+            fill_cell_with_list_of_curies(f"E{r}", ws, g, c, SKOS.narrowMatch)
+            fill_cell_with_list_of_curies(f"F{r}", ws, g, c, SKOS.broadMatch)
+
+            notations = []
+            datatypes = []
+            for i in g.objects(subject=c, predicate=SKOS.notation):
+                notations.append(str(i))
+                datatypes.append(i.datatype)
+            ws[f"G{r}"] = ",\n".join(notations)
+            ws[f"G{r}"].font = Font(size=14)
+            ws[f"H{r}"] = ",\n".join(datatypes)
+            ws[f"H{r}"].font = Font(size=14)
+
+            r += 1
+
+    # Collections
+
+    # Namespaces
+    ws = wb["Prefixes"]
+    common_prefixes = [
+        "ex",
+        "brick",
+        "csvw",
+        "dc",
+        "dcat",
+        "dcmitype",
+        "dcterms",
+        "dcam",
+        "doap",
+        "foaf",
+        "geo",
+        "odrl",
+        "org",
+        "prof",
+        "prov",
+        "qb",
+        "schema",
+        "sh",
+        "skos",
+        "sosa",
+        "ssn",
+        "time",
+        "vann",
+        "void",
+        "wgs",
+        "owl",
+        "rdf",
+        "rdfs",
+        "xsd",
+        "xml",
+    ]
+    r = 4
+    for pre, ns in g.namespaces():
+        if pre not in common_prefixes:
+            ws[f"A{r}"] = pre
+            ws[f"A{r}"].font = Font(size=14)
+            xl_hyperlink(ws[f"B{r}"], ns)
+            r += 1
+
     # save the output
     if output_file_path is None:
         wb.save(str(rdf_file.with_suffix(".xlsx")))
     else:
         wb.save(str(output_file_path))
+
+
+def fill_cell_with_list_of_curies(
+    cell_id: str, ws: Worksheet, g: Graph, subj: URIRef, pred: URIRef
+):
+    xs = []
+    for x in g.objects(subject=subj, predicate=pred):
+        xs.append(x)
+    ws[cell_id] = ",\n".join([g.namespace_manager.curie(z) for z in xs])
+    ws[cell_id].font = Font(size=14)

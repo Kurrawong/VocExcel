@@ -1,6 +1,5 @@
 @prefix : <https://linked.data.gov.au/def/induration-style/> .
 @prefix cs: <https://linked.data.gov.au/def/induration-style> .
-@prefix dcat: <http://www.w3.org/ns/dcat#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
@@ -15,6 +14,7 @@
     skos:definition "completely cemented duricrust"@en ;
     skos:inScheme cs: ;
     rdfs:isDefinedBy cs: ;
+    skos:exactMatch <http://something-strange.com> ;
     skos:prefLabel "completely cemented duricrust"@en .
 
 :ferruginous_moderately_cemented a skos:Concept ;
@@ -29,6 +29,9 @@
     skos:topConceptOf cs: .
 
 :bauxitic_nodules a skos:Concept ;
+    skos:notation
+        "NO10"^^:gaId ,
+        "000010"^^:otherId ;
     skos:altLabel "NO10"@en ;
     skos:broader :bauxitic_induration ,
         :nodules ;
@@ -370,6 +373,7 @@
         :silcrete ,
         :silcrete_pods ,
         :silcrete_sheet ;
+    skos:relatedMatch <http://example.com/fake> ;
     skos:prefLabel "duricrust"@en .
 
 cs: a skos:ConceptScheme ;

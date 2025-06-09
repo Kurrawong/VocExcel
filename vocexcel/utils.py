@@ -8,7 +8,6 @@ import pyshacl
 from colorama import Fore, Style
 from openpyxl import load_workbook as _load_workbook
 from openpyxl.workbook.workbook import Workbook
-from openpyxl.worksheet.hyperlink import Hyperlink
 from pyshacl.pytypes import GraphLike
 from rdflib import BNode, Graph, Literal, Namespace, Node, URIRef
 from rdflib.namespace import DCTERMS, PROV, RDF, SDO, SKOS, XSD

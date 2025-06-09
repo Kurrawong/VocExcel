@@ -41,13 +41,13 @@ from vocexcel.convert_060 import excel_to_rdf as excel_to_rdf_060
 from vocexcel.convert_063 import excel_to_rdf as excel_to_rdf_063
 from vocexcel.convert_070 import excel_to_rdf as excel_to_rdf_070
 from vocexcel.convert_080 import excel_to_rdf as excel_to_rdf_080
+from vocexcel.convert_080 import rdf_to_excel as rdf_to_excel_080
 from vocexcel.utils import (
     EXCEL_FILE_ENDINGS,
     KNOWN_FILE_ENDINGS,
     RDF_FILE_ENDINGS,
     ConversionError,
     get_template_version,
-    load_template,
     load_workbook,
     validate_with_profile,
 )
@@ -56,7 +56,7 @@ TEMPLATE_VERSION = None
 
 
 def excel_to_rdf(
-    file_to_convert_path: Path | BinaryIO,
+    input_file_path: Path | BinaryIO,
     profile="vocpub-49",
     sheet_name: Optional[str] = None,
     output_file_path: Optional[Path] = None,
@@ -67,7 +67,7 @@ def excel_to_rdf(
     validate: Optional[bool] = False,
 ):
     """Converts a sheet within an Excel workbook to an RDF file"""
-    wb = load_workbook(file_to_convert_path)
+    wb = load_workbook(input_file_path)
     template_version = get_template_version(wb)
 
     if template_version in ["0.8.0", "0.8.0.GA"]:
@@ -75,11 +75,6 @@ def excel_to_rdf(
             wb,
             output_file_path,
             output_format,
-            validate,
-            profile,
-            error_level,
-            message_level,
-            log_file,
             template_version,
         )
 
@@ -207,203 +202,13 @@ def excel_to_rdf(
 
 
 def rdf_to_excel(
-    file_to_convert_path: Path,
-    profile: Optional[str] = "vocpub-46",
-    output_file_path: Optional[Path] = None,
-    template_file_path: Optional[Path] = None,
-    error_level=1,
-    message_level=1,
-    log_file=None,
+    rdf_file: Path, output_file_path: Optional[Path] = None, template_version="0.8.0"
 ):
-    if type(file_to_convert_path) is str:
-        file_to_convert_path = Path(file_to_convert_path)
-    if not file_to_convert_path.name.endswith(tuple(RDF_FILE_ENDINGS.keys())):
-        raise ValueError(
-            "Files for conversion to Excel must end with one of the RDF file formats: '{}'".format(
-                "', '".join(RDF_FILE_ENDINGS.keys())
-            )
-        )
-
-    validate_with_profile(
-        str(file_to_convert_path),
-        profile=profile,
-        error_level=error_level,
-        message_level=message_level,
-        log_file=log_file,
+    rdf_to_excel_080(
+        rdf_file,
+        output_file_path,
+        template_version,
     )
-    # the RDF is valid so extract data and create Excel
-    from rdflib import Graph
-    from rdflib.namespace import DCAT, DCTERMS, OWL, PROV, RDF, RDFS, SKOS
-
-    g = Graph().parse(
-        str(file_to_convert_path), format=RDF_FILE_ENDINGS[file_to_convert_path.suffix]
-    )
-
-    if template_file_path is None:
-        wb = load_template(file_path=(Path(__file__).parent / "blank_043.xlsx"))
-    else:
-        wb = load_template(file_path=template_file_path)
-
-    holder = {"hasTopConcept": [], "provenance": None}
-    for s in g.subjects(RDF.type, SKOS.ConceptScheme):
-        holder["uri"] = str(s)
-        for p, o in g.predicate_objects(s):
-            if p == SKOS.prefLabel:
-                holder["title"] = o.toPython()
-            elif p == SKOS.definition:
-                holder["description"] = str(o)
-            elif p == DCTERMS.created:
-                holder["created"] = o.toPython()
-            elif p == DCTERMS.modified:
-                holder["modified"] = o.toPython()
-            elif p == DCTERMS.creator:
-                holder["creator"] = (
-                    models.ORGANISATIONS_INVERSE[o]
-                    if models.ORGANISATIONS_INVERSE.get(o)
-                    else str(o)
-                )
-            elif p == DCTERMS.publisher:
-                holder["publisher"] = (
-                    models.ORGANISATIONS_INVERSE[o]
-                    if models.ORGANISATIONS_INVERSE.get(o)
-                    else str(o)
-                )
-            elif p == OWL.versionInfo:
-                holder["versionInfo"] = str(o)
-            elif p == DCTERMS.source:
-                holder["provenance"] = str(o)
-            elif p == DCTERMS.provenance:
-                holder["provenance"] = str(o)
-            elif p == PROV.wasDerivedFrom:
-                holder["provenance"] = str(o)
-            elif p == SKOS.hasTopConcept:
-                holder["hasTopConcept"].append(str(o))
-            elif p == DCAT.contactPoint:
-                holder["custodian"] = str(o)
-            elif p == RDFS.seeAlso:
-                holder["pid"] = str(o)
-
-    # from models import ConceptScheme, Concept, Collection
-    cs = models.ConceptScheme(
-        uri=holder["uri"],
-        title=holder["title"],
-        description=holder["description"],
-        created=holder["created"],
-        modified=holder["modified"],
-        creator=holder["creator"],
-        publisher=holder["publisher"],
-        version=holder.get("versionInfo", None),
-        provenance=holder.get("provenance", None),
-        custodian=holder.get("custodian", None),
-        pid=holder.get("pid", None),
-    )
-    cs.to_excel(wb)
-
-    # infer inverses
-    for s, o in g.subject_objects(SKOS.broader):
-        g.add((o, SKOS.narrower, s))
-
-    row_no_features, row_no_concepts = 3, 3
-    for s in g.subjects(RDF.type, SKOS.Concept):
-        holder = {
-            "uri": str(s),
-            "pref_label": [],
-            "pl_language_code": [],
-            "definition": [],
-            "def_language_code": [],
-            "children": [],
-            "alt_labels": [],
-            "home_vocab_uri": None,
-            "provenance": None,
-            "related_match": [],
-            "close_match": [],
-            "exact_match": [],
-            "narrow_match": [],
-            "broad_match": [],
-        }
-        for p, o in g.predicate_objects(s):
-            if p == SKOS.prefLabel:
-                holder["pref_label"].append(o.toPython())
-                holder["pl_language_code"].append(o.language)
-            elif p == SKOS.definition:
-                holder["definition"].append(str(o))
-                holder["def_language_code"].append(o.language)
-            elif p == SKOS.narrower:
-                holder["children"].append(str(o))
-            elif p == SKOS.altLabel:
-                holder["alt_labels"].append(str(o))
-            elif p == RDFS.isDefinedBy:
-                holder["home_vocab_uri"] = str(o)
-            elif p == DCTERMS.source:
-                holder["provenance"] = str(o)
-            elif p == DCTERMS.provenance:
-                holder["provenance"] = str(o)
-            elif p == PROV.wasDerivedFrom:
-                holder["provenance"] = str(o)
-            elif p == SKOS.relatedMatch:
-                holder["related_match"].append(str(o))
-            elif p == SKOS.closeMatch:
-                holder["close_match"].append(str(o))
-            elif p == SKOS.exactMatch:
-                holder["exact_match"].append(str(o))
-            elif p == SKOS.narrowMatch:
-                holder["narrow_match"].append(str(o))
-            elif p == SKOS.broadMatch:
-                holder["broad_match"].append(str(o))
-
-        row_no_concepts = models.Concept(
-            uri=holder["uri"],
-            pref_label=holder["pref_label"],
-            pl_language_code=holder["pl_language_code"],
-            definition=holder["definition"],
-            def_language_code=holder["def_language_code"],
-            children=holder["children"],
-            alt_labels=holder["alt_labels"],
-            home_vocab_uri=holder["home_vocab_uri"],
-            provenance=holder["provenance"],
-            related_match=holder["related_match"],
-            close_match=holder["close_match"],
-            exact_match=holder["exact_match"],
-            narrow_match=holder["narrow_match"],
-            broad_match=holder["broad_match"],
-        ).to_excel(wb, row_no_features, row_no_concepts)
-        row_no_features += 1
-
-    row_no = 3
-
-    for s in g.subjects(RDF.type, SKOS.Collection):
-        holder = {"uri": str(s), "members": []}
-        for p, o in g.predicate_objects(s):
-            if p == SKOS.prefLabel:
-                holder["pref_label"] = o.toPython()
-            elif p == SKOS.definition:
-                holder["definition"] = str(o)
-            elif p == SKOS.member:
-                holder["members"].append(str(o))
-            elif p == DCTERMS.source:
-                holder["provenance"] = str(o)
-            elif p == DCTERMS.provenance:
-                holder["provenance"] = str(o)
-            elif p == PROV.wasDerivedFrom:
-                holder["provenance"] = str(o)
-
-        models.Collection(
-            uri=holder["uri"],
-            pref_label=holder["pref_label"],
-            definition=holder["definition"],
-            members=holder["members"],
-            provenance=(
-                holder["provenance"] if holder.get("provenance") is not None else None
-            ),
-        ).to_excel(wb, row_no)
-        row_no += 1
-
-    if output_file_path is not None:
-        dest = output_file_path
-    else:
-        dest = file_to_convert_path.with_suffix(".xlsx")
-    wb.save(filename=dest)
-    return dest
 
 
 def main(args=None):
@@ -425,106 +230,26 @@ def main(args=None):
     )
 
     parser.add_argument(
-        "-l",
-        "--listprofiles",
-        help="This flag, if set, must be the only flag supplied. It will cause the program to list all the vocabulary"
-        " profiles that this converter, indicating both their URI and their short token for use with the"
-        " -p (--profile) flag when converting Excel files",
-        action="store_true",
-    )
-
-    parser.add_argument(
-        "file_to_convert",
+        "input_file",
         nargs="?",  # allow 0 or 1 file name as argument
         type=Path,
-        help="The Excel file to convert to a SKOS vocabulary in RDF or an RDF file to convert to an Excel file",
-    )
-
-    parser.add_argument(
-        "-v", "--validate", help="Validate output file", action="store_true"
-    )
-
-    parser.add_argument(
-        "-p",
-        "--profile",
-        help="A profile - a specified information model - for a vocabulary. This tool understands several profiles and"
-        "you can choose which one you want to convert the Excel file according to. The list of profiles - URIs "
-        "and their corresponding tokens - supported by VocExcel, can be found by running the program with the "
-        "flag -lp or --listprofiles.",
-        default="vocpub-46",
+        help="The Excel file to convert to a SKOS vocabulary in RDF or an RDF file to convert to an Excel file.",
     )
 
     parser.add_argument(
         "-o",
         "--outputfile",
-        help="An optionally-provided output file path. If not provided, output is to standard out.",
-        required=False,
-    )
-
-    parser.add_argument(
-        "-f",
-        "--outputformat",
-        help="An optionally-provided output format for RDF outputs. 'graph' returns the in-memory graph object, "
-        "not serialized RDF.",
-        required=False,
-        choices=["longturtle", "turtle", "xml", "json-ld", "graph"],
-        default="longturtle",
-    )
-
-    parser.add_argument(
-        "-s",
-        "--sheet",
-        help="The sheet within the target Excel Workbook to process",
-        default="vocabulary",
-    )
-
-    parser.add_argument(
-        "-t",
-        "--templatefile",
-        help="An optionally-provided Excel-template file to be used in SKOS-> Excel converion.",
-        type=Path,
-        required=False,
-    )
-
-    # 1 - info, 2 - warning, 3 - violation
-    # error severity level
-    parser.add_argument(
-        "-e",
-        "--errorlevel",
-        help="The minimum severity level which fails validation",
-        default=1,
-    )
-
-    # print severity level
-    parser.add_argument(
-        "-m",
-        "--messagelevel",
-        help="The minimum severity level printed to console",
-        default=1,
-    )
-
-    # log to file
-    parser.add_argument(
-        "-g",
-        "--logfile",
-        help="The file to write logging output to",
-        type=Path,
+        help="An optionally-provided output file path. If not provided, output from Excel-> RDF is to standard out and RDF->Excel is input file with .xlsx file ending.",
         required=False,
     )
 
     args = parser.parse_args(args)
 
     if not args:
-        # show help if no args are given
         parser.print_help()
         parser.exit()
 
-    if args.listprofiles:
-        s = "Profiles\nToken\tIRI\n-----\t-----\n"
-        for k, v in profiles.PROFILES.items():
-            s += f"{k}\t{v.uri}\n"
-        print(s.rstrip())
-    elif args.info:
+    if args.info:
         # not sure what to do here, just removing the errors
         from vocexcel import __version__
 
@@ -534,8 +259,8 @@ def main(args=None):
         print(
             f"Known template versions: {', '.join(sorted(KNOWN_TEMPLATE_VERSIONS, reverse=True))}"
         )
-    elif args.file_to_convert:
-        if not args.file_to_convert.suffix.lower().endswith(tuple(KNOWN_FILE_ENDINGS)):
+    elif args.input_file:
+        if not args.input_file.suffix.lower().endswith(tuple(KNOWN_FILE_ENDINGS)):
             print(
                 "Files for conversion must either end with .xlsx (Excel) or one of the known RDF file endings, '{}'".format(
                     "', '".join(RDF_FILE_ENDINGS.keys())
@@ -543,21 +268,21 @@ def main(args=None):
             )
             parser.exit()
 
-        print(f"Processing file {args.file_to_convert}")
+        print(f"Processing file {args.input_file}")
 
         # input file looks like an Excel file, so convert Excel -> RDF
-        if args.file_to_convert.suffix.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
+        if args.input_file.suffix.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
             try:
                 o = excel_to_rdf(
-                    args.file_to_convert,
-                    profile=args.profile,
-                    sheet_name=args.sheet,
+                    args.input_file,
+                    profile=None,
+                    sheet_name=None,
                     output_file_path=args.outputfile,
-                    output_format=args.outputformat,
-                    error_level=int(args.errorlevel),
-                    message_level=int(args.messagelevel),
-                    log_file=args.logfile,
-                    validate=args.validate,
+                    output_format=None,
+                    error_level=None,
+                    message_level=None,
+                    log_file=None,
+                    validate=None,
                 )
                 if args.outputfile is None:
                     print(o)
@@ -567,21 +292,14 @@ def main(args=None):
 
         # RDF file ending, so convert RDF -> Excel
         else:
-            try:
-                o = rdf_to_excel(
-                    args.file_to_convert,
-                    profile=args.profile,
-                    output_file_path=args.outputfile,
-                    template_file_path=args.templatefile,
-                    error_level=int(args.errorlevel),
-                    message_level=int(args.messagelevel),
-                    log_file=args.logfile,
-                )
-                if args.outputfile is None:
-                    print(o)
-            except ConversionError as err:
-                logging.error(f"{err}")
-                return 1
+            rdf_to_excel(
+                args.input_file,
+                output_file_path=args.outputfile,
+            )
+            if args.outputfile is None:
+                print(f"Converted result at {args.input_file.with_suffix('.xlsx')}")
+            else:
+                print(f"Converted result at {args.outputfile}")
 
 
 if __name__ == "__main__":

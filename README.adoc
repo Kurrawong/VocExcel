@@ -80,52 +80,34 @@ The command line argument options can be found by typing:
 They are:
 
 ----
-usage: vocexcel [-h] [-i] [-l] [-v] [-p PROFILE] [-o OUTPUTFILE] [-f {turtle,xml,json-ld}] [-s SHEET] [-t TEMPLATEFILE] [-e ERRORLEVEL] [-m MESSAGELEVEL] [-g LOGFILE] [file_to_convert]
+usage: vocexcel [-h] [-i] [-o OUTPUTFILE] [input_file]
 
 positional arguments:
-  file_to_convert       The Excel file to convert to a SKOS vocabulary in RDF or an RDF file to convert to an Excel file (default: None)
+  input_file            The Excel file to convert to a SKOS vocabulary in RDF or an RDF file to convert to an Excel file. (default: None)
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -i, --info            The version and other info of this instance of VocExcel. (default: False)
-  -l, --listprofiles    This flag, if set, must be the only flag supplied. It will cause the program to list all the vocabulary profiles that this converter, indicating both their URI and their short token for use with
-                        the -p (--profile) flag when converting Excel files (default: False)
-  -v, --validate        Validate output file (default: False)
-  -p PROFILE, --profile PROFILE
-                        A profile - a specified information model - for a vocabulary. This tool understands several profiles andyou can choose which one you want to convert the Excel file according to. The list of
-                        profiles - URIs and their corresponding tokens - supported by VocExcel, can be found by running the program with the flag -lp or --listprofiles. (default: vocpub)
   -o OUTPUTFILE, --outputfile OUTPUTFILE
-                        An optionally-provided output file path. If not provided, output is to standard out. (default: None)
-  -f {turtle,xml,json-ld,graph}, --outputformat {turtle,xml,json-ld,graph}
-                        An optionally-provided output format for RDF outputs. 'graph' returns the in-memory graph object, not serialized RDF. (default: turtle)
-  -s SHEET, --sheet SHEET
-                        The sheet within the target Excel Workbook to process (default: vocabulary)
-  -t TEMPLATEFILE, --templatefile TEMPLATEFILE
-                        An optionally-provided Excel-template file to be used in SKOS-> Excel converion. (default: None)
-  -e ERRORLEVEL, --errorlevel ERRORLEVEL
-                        The minimum severity level which fails validation (default: 1)
-  -m MESSAGELEVEL, --messagelevel MESSAGELEVEL
-                        The minimum severity level printed to console (default: 1)
-  -g LOGFILE, --logfile LOGFILE
-                        The file to write logging output to (default: None)
+                        An optionally-provided output file path. If not provided, output from Excel-> RDF is to standard out and RDF->Excel is input file with .xlsx file ending. (default: None)
 ----
 
 ==== As a library
 
-The _convert.py_ file uses the function `excel_to_rdf()` to do conversions, so you can directly run that function in other Python programs by importing _convert.py_, like this:
+The _convert.py_ file uses the functions `excel_to_rdf()` and `rdf_to_excel()` to do conversions, so you can directly them in other Python programs by importing them like:
 
 ----
-from vocexcel import convert
+from vocexcel.convert import excel_to_rdf, rdf_to_excel
 from pathlib import Path
 
-convert.rdf_to_excel(Path(".") / "path" / "to" / "vocab-file.xlsx")
+rdf_to_excel(Path(".") / "path" / "to" / "vocab-file.xlsx")
 ----
 
 ==== Online
 
-https://kurrawong.ai[KurrawongAI] maintains an online VocExcel tool at https://vocexcel.dev.kurrawong.ai
+https://kurrawong.ai[KurrawongAI] maintains an online VocExcel tool at https://tools.dev.kurrawong.ai/vocexcel
 
-This repository also contains code to run your own online converter, see the [Vue.js] application in the _vocexcel-ui/_ folder and the Python application server in the _vocexcel/wbe/_ folder.
+This repository also contains code to run your own online converter, see the [Vue.js] application in the _vocexcel-ui/_ folder and the Python application server in the _vocexcel/web/_ folder.
 
 == License
 
@@ -134,7 +116,7 @@ This code is licensed using the BSD 3-Clause. See the _LICENSE_ for the deed. No
 == Contact
 
 **Commercial support**: +
-http://docs.kurrawong.ai/vocexcel +
+https://docs.kurrawong.ai/products/tools/vocexcel/ +
 info@kurrawong.ai
 
 *Lead Developer*: +
