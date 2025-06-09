@@ -553,6 +553,7 @@ dependencies = [
     { name = "black" },
     { name = "colorama" },
     { name = "dateutils" },
+    { name = "fastapi" },
     { name = "jinja2" },
     { name = "mangum" },
     { name = "openpyxl" },
@@ -560,6 +561,7 @@ dependencies = [
     { name = "pydantic" },
     { name = "pyshacl" },
     { name = "pytest" },
+    { name = "python-multipart" },
     { name = "rdflib" },
     { name = "setuptools" },
 ]
@@ -581,6 +583,7 @@ requires-dist = [
     { name = "black", specifier = ">=25.1.0,<26.0.0" },
     { name = "colorama", specifier = ">=0.4.4,<1.0.0" },
     { name = "dateutils", specifier = ">=0.6.12,<1.0.0" },
+    { name = "fastapi", specifier = ">=0.115.12" },
     { name = "jinja2", specifier = ">=3.1.2,<4.0.0" },
     { name = "mangum", specifier = ">=0.17.0,<1.0.0" },
     { name = "openpyxl", specifier = ">=3.0.9,<4.0.0" },
@@ -588,6 +591,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=1.9.0,<2.0.0" },
     { name = "pyshacl", specifier = ">=0.18.1,<1.0.0" },
     { name = "pytest", specifier = ">=7.2.0,<8.0.0" },
+    { name = "python-multipart", specifier = ">=0.0.20" },
     { name = "rdflib", specifier = ">=7.0.0,<8.0.0" },
     { name = "setuptools", specifier = ">=70.0.0,<71.0.0" },
 ]

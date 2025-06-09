@@ -67,6 +67,8 @@ dependencies = [
     "jinja2<4.0.0,>=3.1.2",
     "mangum<1.0.0,>=0.17.0",
     "black<26.0.0,>=25.1.0",
+    "fastapi>=0.115.12",
+    "python-multipart>=0.0.20",
 ]
 name = "vocexcel"
 version = "0.8.1"
