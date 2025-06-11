@@ -39,7 +39,7 @@ def extract_prefixes(sheet: Worksheet):
 
 
 def extract_concept_scheme(
-    sheet: Worksheet, prefixes, template_version="0.8.0"
+    sheet: Worksheet, prefixes, template_version="0.8.4"
 ) -> tuple[Graph, str]:
     iri_s = sheet["B3"].value
     title = sheet["B4"].value
@@ -56,7 +56,7 @@ def extract_concept_scheme(
     voc_der_mod = sheet["B15"].value
     themes = split_and_tidy_to_strings(sheet["B16"].value)
     status = sheet["B17"].value
-    if template_version == "0.8.0.GA":
+    if template_version == "0.8.4.GA":
         catalogue_pid = sheet["B18"].value
 
     if iri_s is None:
@@ -126,7 +126,7 @@ def extract_concept_scheme(
             f"If supplied, it must be one of {', '.join(STATUSES.keys())}"
         )
 
-    if template_version == "0.8.0.GA":
+    if template_version == "0.8.4.GA":
         if catalogue_pid is None or not str(catalogue_pid).startswith(
             "https://pid.geoscience.gov.au/"
         ):
@@ -179,7 +179,7 @@ def extract_concept_scheme(
     if status is not None:
         g.add((iri, SDO.status, URIRef(STATUSES[status])))
 
-    if template_version == "0.8.0.GA":
+    if template_version == "0.8.4.GA":
         g.add((iri, SDO.identifier, Literal(catalogue_pid, datatype=XSD.anyURI)))
 
     bind_namespaces(g, prefixes)
@@ -315,11 +315,11 @@ def excel_to_rdf(
     output_format: TypeLiteral[
         "longturtle", "turtle", "xml", "json-ld", "graph"
     ] = "longturtle",
-    template_version="0.8.0",
+    template_version="0.8.4",
 ):
-    if template_version not in ["0.8.0", "0.8.0.GA"]:
+    if template_version not in ["0.8.4", "0.8.4.GA"]:
         raise ValueError(
-            f"This converter can only handle templates with versions 0.8.0 or 0.8.0.GA, not {template_version}"
+            f"This converter can only handle templates with versions 0.8.x or 0.8.x.GA, not {template_version}"
         )
 
     prefixes = extract_prefixes(wb["Prefixes"])
@@ -353,7 +353,7 @@ def excel_to_rdf(
 
 
 def rdf_to_excel(
-    rdf_file: Path, output_file_path: Optional[Path] = None, template_version="0.8.0"
+    rdf_file: Path, output_file_path: Optional[Path] = None, template_version="0.8.4"
 ):
     # value checkers
     if not rdf_file.name.endswith(tuple(RDF_FILE_ENDINGS.keys())):
@@ -369,9 +369,9 @@ def rdf_to_excel(
                 "If specifying an output_file_path, it must end with .xlsx"
             )
 
-    if template_version not in ["0.8.0", "0.8.0.GA"]:
+    if template_version not in ["0.8.4", "0.8.4.GA"]:
         raise ValueError(
-            f"This converter can only handle templates with versions 0.8.0 or 0.8.0.GA, not {template_version}"
+            f"This converter can only handle templates with versions 0.8.4 or 0.8.4.GA, not {template_version}"
         )
 
     # load the RDF file
@@ -388,8 +388,8 @@ def rdf_to_excel(
     # load the template
     fn = (
         "VocExcel-template-080-GA.xlsx"
-        if template_version == "0.8.0.GA"
-        else "VocExcel-template-080.xlsx"
+        if template_version == "0.8.4.GA"
+        else "VocExcel-template-084.xlsx"
     )
     wb = load_workbook(Path(__file__).parent.parent / "templates" / fn)
 
@@ -442,7 +442,7 @@ def rdf_to_excel(
         [str(x) for x in g.objects(subject=cs_iri, predicate=SDO.keywords)]
     )
     ws["B17"] = str(g.value(subject=cs_iri, predicate=SDO.status)).split("/")[-1]
-    if template_version == "0.8.0.GA":
+    if template_version == "0.8.4.GA":
         ws["B18"] = str(g.value(subject=cs_iri, predicate=SDO.identifier))
 
     # Concepts

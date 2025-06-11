@@ -11,8 +11,8 @@ TEMPLATES_DIR_PATH = Path(__file__).parent.parent.absolute() / "templates"
 TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 
-def test_080():
-    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "080.xlsx", output_format="graph")
+def test_084():
+    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "084.xlsx", output_format="graph")
 
     assert (
         URIRef("http://example.com/voc/myvoc"),
@@ -42,8 +42,8 @@ def test_080():
     ) in g
 
 
-def test_080GA():
-    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "080GA.xlsx", output_format="graph")
+def test_084GA():
+    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "084GA.xlsx", output_format="graph")
 
     assert (
         URIRef("http://example.com/voc/myvoc"),

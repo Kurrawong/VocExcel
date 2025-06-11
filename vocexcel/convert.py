@@ -40,8 +40,8 @@ from vocexcel.convert_043 import (
 from vocexcel.convert_060 import excel_to_rdf as excel_to_rdf_060
 from vocexcel.convert_063 import excel_to_rdf as excel_to_rdf_063
 from vocexcel.convert_070 import excel_to_rdf as excel_to_rdf_070
-from vocexcel.convert_080 import excel_to_rdf as excel_to_rdf_080
-from vocexcel.convert_080 import rdf_to_excel as rdf_to_excel_080
+from vocexcel.convert_084 import excel_to_rdf as excel_to_rdf_084
+from vocexcel.convert_084 import rdf_to_excel as rdf_to_excel_084
 from vocexcel.utils import (
     EXCEL_FILE_ENDINGS,
     KNOWN_FILE_ENDINGS,
@@ -50,6 +50,7 @@ from vocexcel.utils import (
     get_template_version,
     load_workbook,
     validate_with_profile,
+    KNOWN_TEMPLATE_VERSIONS
 )
 
 TEMPLATE_VERSION = None
@@ -70,15 +71,15 @@ def excel_to_rdf(
     wb = load_workbook(input_file_path)
     template_version = get_template_version(wb)
 
-    if template_version in ["0.8.0", "0.8.0.GA"]:
-        return excel_to_rdf_080(
+    if template_version in ["0.8.4", "0.8.4.GA"]:
+        return excel_to_rdf_084(
             wb,
             output_file_path,
             output_format,
             template_version,
         )
 
-    if template_version in ["0.7.1"]:
+    elif template_version in ["0.7.1"]:
         return excel_to_rdf_070(
             wb,
             output_file_path,
@@ -91,7 +92,7 @@ def excel_to_rdf(
             template_version,
         )
 
-    if template_version in ["0.7.0"]:
+    elif template_version in ["0.7.0"]:
         return excel_to_rdf_070(
             wb,
             output_file_path,
@@ -178,6 +179,9 @@ def excel_to_rdf(
         except ValidationError as e:
             raise ConversionError(f"ConceptScheme processing error: {e}")
 
+    else:
+        return ConversionError(f"Unknown template version: {template_version}. Must be one of {', '.join(KNOWN_TEMPLATE_VERSIONS)}")
+
     # Build the total vocab
     vocab_graph = models.Vocabulary(
         concept_scheme=cs, concepts=concepts, collections=collections
@@ -204,7 +208,7 @@ def excel_to_rdf(
 def rdf_to_excel(
     rdf_file: Path, output_file_path: Optional[Path] = None, template_version="0.8.0"
 ):
-    rdf_to_excel_080(
+    rdf_to_excel_084(
         rdf_file,
         output_file_path,
         template_version,
