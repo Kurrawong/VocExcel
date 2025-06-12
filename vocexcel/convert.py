@@ -50,7 +50,6 @@ from vocexcel.utils import (
     ConversionError,
     get_template_version,
     load_workbook,
-    validate_with_profile,
     KNOWN_TEMPLATE_VERSIONS,
     return_error
 )
@@ -59,19 +58,23 @@ TEMPLATE_VERSION = None
 
 
 def excel_to_rdf(
-    input_file_path: Path | BinaryIO,
-    profile="vocpub-49",
-    sheet_name: Optional[str] = None,
+    excel_file: Path | BinaryIO,
     output_file: Optional[Path] = None,
     output_format: Literal["rdf", "graph"] = "rdf",
-    error_level=1,  # TODO: list Literal possible values
-    message_level=1,  # TODO: list Literal possible values
-    log_file: Optional[Path] = None,
-    validate: Optional[bool] = False,
     error_format: TypeLiteral["python", "cmd", "json"] = "python"
 ):
-    """Converts a sheet within an Excel workbook to an RDF file"""
-    wb = load_workbook(input_file_path, error_format)
+    """Converts an Excel workbook file to RDF
+
+    Parameters:
+        excel_file: The Excel workbook file to convert
+        output_file: Optional. If set, the RDF output will be written to this file in the turtle format.
+        output_format: Optional, default rdf. rdf: return serialized RDF in the turtle format, graph: return an RDFLib Graph object
+        error_format: Optional, default python. the kind of errors to return: python is Python, cmd is command line-formatted string, json is stringified JSON
+
+    Returns:
+        output_format or an error in one of the error_formats
+    """
+    wb = load_workbook(excel_file, error_format)
     if not isinstance(wb, Workbook):
         return wb
 
@@ -93,12 +96,7 @@ def excel_to_rdf(
             wb,
             output_file,
             output_format,
-            validate,
-            profile,
-            error_level,
-            message_level,
-            log_file,
-            template_version,
+            template_version=template_version,
         )
 
     elif template_version in ["0.7.0"]:
@@ -106,12 +104,7 @@ def excel_to_rdf(
             wb,
             output_file,
             output_format,
-            validate,
-            profile,
-            error_level,
-            message_level,
-            log_file,
-            template_version,
+            template_version=template_version,
         )
 
     # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
@@ -119,25 +112,15 @@ def excel_to_rdf(
         return excel_to_rdf_063(
             wb,
             output_file,
-            output_format,
-            validate,
-            profile,
-            error_level,
-            message_level,
-            log_file,
-            template_version,
+            "longturtle" if output_format == "rdf" else "graph",
+            template_version=template_version,
         )
 
     elif template_version in ["0.5.0", "0.6.0", "0.6.1"]:
         return excel_to_rdf_060(
             wb,
             output_file,
-            output_format,
-            validate,
-            profile,
-            error_level,
-            message_level,
-            log_file,
+            "longturtle" if output_format == "rdf" else "graph",
         )
 
     elif template_version in ["0.4.3", "0.4.4"]:
@@ -157,7 +140,7 @@ def excel_to_rdf(
             raise ConversionError(f"ConceptScheme processing error: {e}")
 
     elif template_version == "0.3.0" or template_version == "0.2.1":
-        sheet = wb["vocabulary" if sheet_name is None else sheet_name]
+        sheet = wb["vocabulary"]
         # read from the vocabulary sheet of the workbook unless given a specific sheet
 
         if template_version == "0.2.1":
@@ -186,24 +169,17 @@ def excel_to_rdf(
             )
             cs = extract_concept_scheme_040(sheet)
         except ValidationError as e:
-            raise ConversionError(f"ConceptScheme processing error: {e}")
+            error = ConversionError(f"ConceptScheme processing error: {e}")
+            return return_error(error, error_format)
 
     else:
-        return ConversionError(f"Unknown template version: {template_version}. Must be one of {', '.join(KNOWN_TEMPLATE_VERSIONS)}")
+        error = ConversionError(f"Unknown template version: {template_version}. Must be one of {', '.join(KNOWN_TEMPLATE_VERSIONS)}")
+        return return_error(error, error_format)
 
     # Build the total vocab
     vocab_graph = models.Vocabulary(
         concept_scheme=cs, concepts=concepts, collections=collections
     ).to_graph()
-
-    if validate:
-        validate_with_profile(
-            vocab_graph,
-            profile=profile,
-            error_level=error_level,
-            message_level=message_level,
-            log_file=log_file,
-        )
 
     if output_file is not None:
         vocab_graph.serialize(destination=str(output_file), format="longturtle")
@@ -212,6 +188,34 @@ def excel_to_rdf(
             return vocab_graph
         else:
             return vocab_graph.serialize(format="longturtle")
+
+
+def rdf_to_excel(
+    rdf_file: Path,
+    output_file: Optional[Path] = None,
+    template_version="0.8.4",
+    output_format: TypeLiteral["blob", "file"] = "file",
+    error_format: TypeLiteral["python", "cmd", "json"] = "python",
+):
+    """Converts RDF files to Excel workbooks.
+
+    Parameters:
+        rdf_file: Required. An RDF file in one of the common formats understood by RDFLib
+        output_file: Optional, default none. A name for an Excel file to output. Must end in .xlsx. Not used if output_format set to blob
+        template_version: Optional, default 0.8.4. Currently only 0.8.4 and 0.8.4.GA are supported
+        output_format: Optional, default file. Whether to return a binary blob (openpyxl Workbook instance) or write results to file.
+        error_format: Optional, default python. the kind of errors to return: python is Python, cmd is command line-formatted string, json is stringified JSON
+
+    Returns:
+        output_format or an error in one of the error_formats
+    """
+    return rdf_to_excel_084(
+        rdf_file,
+        output_file,
+        template_version,
+        output_format,
+        error_format,
+    )
 
 
 def main(args=None):
@@ -278,14 +282,8 @@ def main(args=None):
             try:
                 o = excel_to_rdf(
                     args.input_file,
-                    profile=None,
-                    sheet_name=None,
                     output_file=args.outputfile,
-                    output_format=None,
-                    error_level=None,
-                    message_level=None,
-                    log_file=None,
-                    validate=None,
+                    output_format="rdf"
                 )
                 if args.outputfile is None:
                     print(o)
@@ -294,12 +292,7 @@ def main(args=None):
 
         # RDF file ending, so convert RDF -> Excel
         else:
-            rdf_to_excel_084(
-                args.input_file,
-                output_file=args.outputfile,
-                output_format="file",
-                error_format="cmd"
-            )
+            rdf_to_excel(args.input_file, args.outputfile, error_format="cmd")
 
             if args.outputfile is None:
                 print(f"Converted result at {args.input_file.with_suffix('.xlsx')}")

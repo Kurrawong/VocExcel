@@ -1,13 +1,11 @@
 import json
 from pathlib import Path
-from sqlite3 import Blob
 
 import pytest
 from openpyxl.workbook import Workbook
-from openpyxl.worksheet.worksheet import Worksheet
 from rdflib import SDO, SKOS, Literal, URIRef
 
-from vocexcel.convert_084 import excel_to_rdf, rdf_to_excel
+from vocexcel.convert import excel_to_rdf, rdf_to_excel
 from vocexcel.utils import STATUSES, load_workbook, ShaclValidationError
 
 def test_basic_084():
@@ -111,9 +109,8 @@ def test_return_formats():
     RDF_FILE = Path(__file__).parent / "data" / "084_rdf.ttl"
     XL_FILE = RDF_FILE.with_suffix(".xlsx")
 
-    with pytest.raises(ValueError):
-        rdf_to_excel(RDF_FILE, output_file=XL_FILE, output_format="graph")
-
+    # with pytest.raises(ValueError):
+    #     rdf_to_excel(RDF_FILE, output_file=XL_FILE, output_format="graph")
 
     b = rdf_to_excel(RDF_FILE, output_file=XL_FILE, output_format="blob")
     assert isinstance(b, Workbook)

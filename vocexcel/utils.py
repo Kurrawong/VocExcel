@@ -83,7 +83,10 @@ class ShaclValidationError(ConversionError):
         self.graph = graph
 
 
-def load_workbook(file_path: Path, error_format: TypeLiteral["python", "cmd", "json"] = "python") -> Workbook|str|None:
+def load_workbook(file_path: Path|Workbook, error_format: TypeLiteral["python", "cmd", "json"] = "python") -> Workbook|str|None:
+    if isinstance(file_path, Workbook):
+        return file_path
+
     if not isinstance(
         file_path, SpooledTemporaryFile
     ) and not file_path.name.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):

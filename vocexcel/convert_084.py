@@ -354,6 +354,17 @@ def excel_to_rdf(
     output_format: TypeLiteral["graph", "rdf", ] = "rdf",
     error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ):
+    """Converts an Excel workbook file to RDF
+
+    Parameters:
+        excel_file: The Excel workbook file to convert
+        output_file: Optional. If set, the RDF output will be written to this file in the turtle format.
+        output_format: Optional, default rdf. rdf: return serialized RDF in the turtle format, graph: return an RDFLib Graph object
+        error_format: Optional, default python. the kind of errors to return: python is Python, cmd is command line-formatted string, json is stringified JSON
+
+    Returns:
+        output_format or an error in one of the error_formats
+    """
 
     if not isinstance(wb, Workbook):
         error = ValueError(
@@ -442,6 +453,19 @@ def rdf_to_excel(
     output_format: TypeLiteral["blob", "file"] = "file",
     error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ):
+    """Converts RDF files to Excel workbooks.
+
+    Parameters:
+        rdf_file: Required. An RDF file in one of the common formats understood by RDFLib
+        output_file: Optional, default none. A name for an Excel file to output. Must end in .xlsx. Not used if output_format set to blob
+        template_version: Optional, default 0.8.4. Currently only 0.8.4 and 0.8.4.GA are supported
+        output_format: Optional, default file. Whether to return a binary blob (openpyxl Workbook instance) or write results to file.
+        error_format: Optional, default python. the kind of errors to return: python is Python, cmd is command line-formatted string, json is stringified JSON
+
+    Returns:
+        output_format or an error in one of the error_formats
+    """
+
     # value checkers
     if not rdf_file.name.endswith(tuple(RDF_FILE_ENDINGS.keys())):
         error = ValueError(

@@ -1,6 +1,8 @@
 import sys
 from pathlib import Path
 
+import vocexcel.utils
+
 sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from rdflib import URIRef
 from rdflib.namespace import SKOS
@@ -11,11 +13,18 @@ TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 
 def test_example_complex():
-    g = convert.excel_to_rdf(
-        Path(__file__).parent.parent / "templates" / "VocExcel-template-030.xlsx",
-        sheet_name="example - complex",
-        output_format="graph",
-    )
+    from vocexcel.convert_030 import extract_concept_scheme, extract_concepts_and_collections
+    from vocexcel import models
+    wb = vocexcel.utils.load_workbook(Path(__file__).parent.parent.resolve() / "templates" / "VocExcel-template-030.xlsx")
+
+    sheet = wb["example - complex"]
+    cs = extract_concept_scheme(sheet)
+
+    concepts, collections = extract_concepts_and_collections(sheet)
+
+    g = models.Vocabulary(
+        concept_scheme=cs, concepts=concepts, collections=collections
+    ).to_graph()
 
     top_concepts = 0
     for s, o in g.subject_objects(SKOS.topConceptOf):

@@ -106,7 +106,7 @@ options:
                         An optionally-provided output file path. If not provided, output from Excel-> RDF is to standard out and RDF->Excel is input file with .xlsx file ending. (default: None)
 ----
 
-==== As a library
+==== As a Python library
 
 The _convert.py_ file uses the functions `excel_to_rdf()` and `rdf_to_excel()` to do conversions, so you can directly them in other Python programs by importing them like:
 
@@ -115,6 +115,10 @@ from vocexcel.convert import excel_to_rdf, rdf_to_excel
 from pathlib import Path
 
 rdf_to_excel(Path(".") / "path" / "to" / "vocab-file.xlsx")
+
+# or
+
+excel_to_rdf(Path(".") / "path" / "to" / "vocab-file.ttl")
 ----
 
 ==== Online
