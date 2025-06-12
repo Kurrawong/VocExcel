@@ -7,7 +7,7 @@ Another Excel-to-RDF converter for SKOS vocabs, but one that:
 * meets particular SKOS profile outcomes (https://w3id.org/profile/vocpub[VocPub])
 * is under active development, production use, and is commercially supported
 
-An online version of VocExcel is available at https://tools.dev.kurrawong.ai/vocexcel.
+An online version of VocExcel is available at https://tools.kurrawong.ai/vocexcel.
 
 == Creating vocabularies
 
@@ -26,7 +26,7 @@ Use one Excel workbook per vocabulary.
 
 === Latest Template
 
-* **templates/VocExcel-template-080.xlsx**
+* **templates/VocExcel-template-084.xlsx**
 
 Unless you have a good reason to do something different, please use the latest version of the template.
 
@@ -34,7 +34,7 @@ Older templates still convert, so if you've used one and like it, keep using it.
 
 === Examples
 
-Example filled-in templates versions are given in the `tests/data/` folder. Just ensure you're looking at examples prefixed with the same template version you are after, e.g. 0.8.0 = 080.xlsx.
+Example filled-in templates versions are given in the `tests/data/` folder. Just ensure you're looking at examples prefixed with the same template version you are after, e.g. 0.8.4 = 084.xlsx.
 
 As per _semantic versioning_, a template of 0.8.2 will work with 0.8.0. 
 
@@ -44,7 +44,7 @@ To process an Excel template, you will need to either:
 
 * run the VocExcel Python script, or
 * use an online tool
-** for example https://tools.dev.kurrawong.ai/vocexcel
+** for example https://tools.kurrawong.ai/tools/vocexcel
 
 The Python script can also run as a Python module, i.e. within a larger Python workflow.
 
@@ -76,13 +76,13 @@ vocexel some-excel-file.xlsx
 An example, using one of the test data files to convert from Excel to RDF:
 
 ----
-python convert.py tests/data/080.xlsx
+python convert.py tests/data/084.xlsx
 ----
 
 To convert the other way - RDF to Excel - from with you'll get a v0.8.x template result:
 
 ----
-python convert.py tests/data/080_rdf.ttl
+python convert.py tests/data/084_rdf.ttl
 ----
 
 The command line argument options can be found by typing:
@@ -123,9 +123,7 @@ excel_to_rdf(Path(".") / "path" / "to" / "vocab-file.ttl")
 
 ==== Online
 
-https://kurrawong.ai[KurrawongAI] maintains an online VocExcel tool at https://tools.dev.kurrawong.ai/vocexcel
-
-This repository also contains code to run your own online converter, see the [Vue.js] application in the _vocexcel-ui/_ folder and the Python application server in the _vocexcel/web/_ folder.
+https://kurrawong.ai[KurrawongAI] maintains an online VocExcel tool at https://tools.kurrawong.ai/tools/vocexcel
 
 == License
 
