@@ -23,7 +23,7 @@ def test_empty_template():
 def test_simple():
     convert.excel_to_rdf(
         TESTS_DATA_DIR_PATH / "040_simple.xlsx",
-        output_file_path=TESTS_DATA_DIR_PATH / "040_simple.ttl",
+        output_file=TESTS_DATA_DIR_PATH / "040_simple.ttl",
     )
     g = Graph().parse(TESTS_DATA_DIR_PATH / "040_simple.ttl")
     assert len(g) == 142

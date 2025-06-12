@@ -22,7 +22,7 @@ def test_empty_template():
 def test_simple():
     g = convert.excel_to_rdf(
         TESTS_DATA_DIR_PATH / "043_simple_valid.xlsx",
-        # output_file_path=TESTS_DATA_DIR_PATH /"043_simple_valid_nc.ttl"
+        # output_file=TESTS_DATA_DIR_PATH /"043_simple_valid_nc.ttl"
         output_format="graph",
     )
     assert (
@@ -53,7 +53,7 @@ def test_rdf_to_excel():
     g1 = Graph().parse(TESTS_DATA_DIR_PATH / "043_exhaustive.ttl")
     convert.rdf_to_excel(
         TESTS_DATA_DIR_PATH / "043_exhaustive.ttl",
-        output_file_path=TESTS_DATA_DIR_PATH / "043_exhaustive_roundtrip.xlsx",
+        output_file=TESTS_DATA_DIR_PATH / "043_exhaustive_roundtrip.xlsx",
     )
     g2 = convert.excel_to_rdf(
         TESTS_DATA_DIR_PATH / "043_exhaustive.xlsx", output_format="graph"

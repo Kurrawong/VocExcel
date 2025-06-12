@@ -20,6 +20,7 @@ from vocexcel.utils import (
     STATUSES,
     VOCDERMODS,
     ConversionError,
+    ShaclValidationError,
     add_top_concepts,
     bind_namespaces,
     load_workbook,
@@ -29,17 +30,37 @@ from vocexcel.utils import (
     split_and_tidy_to_strings,
     xl_hyperlink,
     fill_cell_with_list_of_curies,
+    return_error
 )
 
 DATAROLES = Namespace("https://linked.data.gov.au/def/data-roles/")
 
 
-def extract_prefixes(sheet: Worksheet):
-    return extract_prefixes_070(sheet)
+def extract_prefixes(sheet: Worksheet, error_format: TypeLiteral["python", "cmd", "json"] = "python",) -> dict[str, Namespace]|str|None:
+    prefixes = {}
+    i = 3
+    while True:
+        ns = sheet[f"B{i}"].value
+        if ns is None:
+            break
+        else:
+            if not ns.startswith("http"):
+                error = ConversionError(
+                    f"Your namespace value on sheet Prefixes, cell C{i} is invalid. It must start with 'http'"
+                )
+                return return_error(error, error_format)
+
+            pre = sheet[f"A{i}"].value
+            proper_pre = str(pre).strip(":") + ":" if pre is not None else ":"
+            prefixes[proper_pre] = ns
+
+        i += 1
+
+    return prefixes
 
 
 def extract_concept_scheme(
-    sheet: Worksheet, prefixes, template_version="0.8.4"
+    sheet: Worksheet, prefixes, template_version="0.8.4", error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ) -> tuple[Graph, str]:
     iri_s = sheet["B3"].value
     title = sheet["B4"].value
@@ -60,79 +81,91 @@ def extract_concept_scheme(
         catalogue_pid = sheet["B18"].value
 
     if iri_s is None:
-        raise ConversionError(
+        error = ConversionError(
             "Your vocabulary has no IRI. Please add it to the Concept Scheme sheet"
         )
+        return return_error(error, error_format)
     else:
         iri = make_iri(iri_s, prefixes)
 
     if title is None:
-        raise ConversionError(
+        error = ConversionError(
             "Your vocabulary has no title. Please add it to the Concept Scheme sheet"
         )
+        return return_error(error, error_format)
 
     if description is None:
-        raise ConversionError(
+        error = ConversionError(
             "Your vocabulary has no description. Please add it to the Concept Scheme sheet"
         )
+        return return_error(error, error_format)
 
     if created is None:
-        raise ConversionError(
+        error = ConversionError(
             "Your vocabulary has no created date. Please add it to the Concept Scheme sheet"
         )
+        return return_error(error, error_format)
 
     if modified is None:
-        raise ConversionError(
+        error = ConversionError(
             "Your vocabulary has no modified date. Please add it to the Concept Scheme sheet"
         )
+        return return_error(error, error_format)
 
     if creator is None:
-        raise ConversionError(
+        error = ConversionError(
             "Your vocabulary has no creator. Please add it to the Concept Scheme sheet"
         )
+        return return_error(error, error_format)
 
     if publisher is None:
-        raise ConversionError(
+        error = ConversionError(
             "Your vocabulary has no publisher. Please add it to the Concept Scheme sheet"
         )
+        return return_error(error, error_format)
 
     if history_note is None:
-        raise ConversionError(
+        error = ConversionError(
             "Your vocabulary has no History Note statement. Please add it to the Concept Scheme sheet"
         )
+        return return_error(error, error_format)
 
     # citation
 
     if derived_from is not None:
         if voc_der_mod is None:
-            raise ConversionError(
+            error = ConversionError(
                 "If you supply a 'Derived From' value - IRI of another vocab - "
                 "you must also supply a 'Derivation Mode' value"
             )
+            return return_error(error, error_format)
 
         if voc_der_mod not in VOCDERMODS:
-            raise ConversionError(
+            error = ConversionError(
                 f"You have supplied a vocab derivation mode for your vocab of {voc_der_mod} but it is not recognised. "
                 f"If supplied, it must be one of {', '.join(VOCDERMODS.keys())}"
             )
+            return return_error(error, error_format)
 
         derived_from = make_iri(derived_from, prefixes)
 
     # keywords
 
     if status is not None and status not in STATUSES:
-        raise ConversionError(
+        error = ConversionError(
             f"You have supplied a status for your vocab of {status} but it is not recognised. "
             f"If supplied, it must be one of {', '.join(STATUSES.keys())}"
         )
+        return return_error(error, error_format)
 
     if template_version == "0.8.4.GA":
         if catalogue_pid is None or not str(catalogue_pid).startswith(
             "https://pid.geoscience.gov.au/"
         ):
-            raise ConversionError(
+            error = ConversionError(
                 "All GA vocabularies must have an eCat ID starting https://pid.geoscience.gov.au/dataset/..., assigned in the Concept Scheme metadata"
             )
+            return return_error(error, error_format)
 
     g = Graph(bind_namespaces="rdflib")
     g.add((iri, RDF.type, SKOS.ConceptScheme))
@@ -187,7 +220,7 @@ def extract_concept_scheme(
     return g, iri
 
 
-def extract_concepts(sheet: Worksheet, prefixes, cs_iri):
+def extract_concepts(sheet: Worksheet, prefixes, cs_iri, error_format: TypeLiteral["python", "cmd", "json"] = "python"):
     g = Graph(bind_namespaces="rdflib")
     i = 4
     while True:
@@ -212,32 +245,37 @@ def extract_concepts(sheet: Worksheet, prefixes, cs_iri):
         iri = make_iri(iri_s, prefixes)
 
         if pref_label is None:
-            raise ConversionError(
+            error = ConversionError(
                 f"You must provide a Preferred Label for Concept {iri_s}"
             )
+            return return_error(error, error_format)
 
         if definition is None:
-            raise ConversionError(f"You must provide a Definition for Concept {iri_s}")
+            error = ConversionError(f"You must provide a Definition for Concept {iri_s}")
+            return return_error(error, error_format)
 
         if status is not None and status not in STATUSES:
-            raise ConversionError(
+            error = ConversionError(
                 f"You have supplied a status for your Concept of {status} but it is not recognised. "
                 f"If supplied, it must be one of {', '.join(STATUSES.keys())}"
             )
+            return return_error(error, error_format)
 
         if image_url is not None:
             if not image_url.startswith("http"):
-                raise ConversionError(
+                error = ConversionError(
                     "If supplied, an Image URL must start with 'http'"
                 )
+                return return_error(error, error_format)
 
         # TODO: test embedded mage is not too large
         # image_embedded
         if image_embedded not in [None, "#VALUE!"]:
-            raise ConversionError(
+            error = ConversionError(
                 "The Image Embedded colum, you must only insert images or leave it blank. "
                 f"You have an unexpected value in Cell L{i}"
             )
+            return return_error(error, error_format)
 
         # ignore example Concepts
         if iri_s in [
@@ -301,36 +339,82 @@ def extract_concepts(sheet: Worksheet, prefixes, cs_iri):
     return g
 
 
-def extract_collections(sheet: Worksheet, prefixes, cs_iri):
+def extract_collections(sheet: Worksheet, prefixes, cs_iri, error_format: TypeLiteral["python", "cmd", "json"] = "python"):
     return extract_collections_070(sheet, prefixes, cs_iri)
 
 
-def extract_additions_concept_properties(sheet: Worksheet, prefixes):
+def extract_additions_concept_properties(sheet: Worksheet, prefixes, error_format: TypeLiteral["python", "cmd", "json"] = "python"):
     return extract_additions_concept_properties_070(sheet, prefixes)
 
 
 def excel_to_rdf(
     wb: Workbook,
-    output_file_path: Optional[Path] = None,
-    output_format: TypeLiteral[
-        "longturtle", "turtle", "xml", "json-ld", "graph"
-    ] = "longturtle",
-    template_version="0.8.4",
+    output_file: Optional[Path] = None,
+    template_version: str ="0.8.4",
+    output_format: TypeLiteral["graph", "rdf", ] = "rdf",
+    error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ):
+
+    if not isinstance(wb, Workbook):
+        error = ValueError(
+            "Files for conversion to Excel must end with one of the RDF file formats: '{}'".format(
+                "', '".join(RDF_FILE_ENDINGS.keys())
+            )
+        )
+        return return_error(error, error_format)
+
+    if output_file is not None:
+        if not Path(output_file).suffix in RDF_FILE_ENDINGS:
+            error = ValueError(
+                f"If specifying output_file, it must have a file suffix in {', '.join(RDF_FILE_ENDINGS)}, not {output_file}."
+            )
+            return return_error(error, error_format)
+
     if template_version not in ["0.8.4", "0.8.4.GA"]:
-        raise ValueError(
+        error = ValueError(
             f"This converter can only handle templates with versions 0.8.x or 0.8.x.GA, not {template_version}"
         )
+        return return_error(error, error_format)
 
-    prefixes = extract_prefixes(wb["Prefixes"])
-    cs, cs_iri = extract_concept_scheme(
-        wb["Concept Scheme"], prefixes, template_version
+    allowed_output_formats = ["graph", "rdf"]
+    if output_format not in allowed_output_formats:
+        error = ValueError(
+            f"If specifying output_format, it be in {', '.join(allowed_output_formats)}, not {output_format}."
+        )
+        return return_error(error, error_format)
+
+    allowed_error_formats = ["python", "cmd", "json"]
+    if error_format not in allowed_error_formats:
+        error = ValueError(
+            f"error_format must be on of {', '.join(allowed_error_formats)}, not {error_format}"
+        )
+        return return_error(error, error_format)
+
+    prefixes = extract_prefixes(wb["Prefixes"], error_format)
+    if not isinstance(prefixes, dict):
+        return prefixes
+
+    x = extract_concept_scheme(
+        wb["Concept Scheme"], prefixes, template_version, error_format
     )
+    if isinstance(x, tuple):
+        cs, cs_iri = x
+    else:
+        return x
+
     cons = extract_concepts(wb["Concepts"], prefixes, cs_iri)
+    if not isinstance(cons, Graph):
+        return cons
+
     cols = extract_collections(wb["Collections"], prefixes, cs_iri)
+    if not isinstance(cols, Graph):
+        return cols
+
     extra = extract_additions_concept_properties(
         wb["Additional Concept Properties"], prefixes
     )
+    if not isinstance(extra, Graph):
+        return extra
 
     g = cs + cons + cols + extra
     g = add_top_concepts(g)
@@ -339,43 +423,67 @@ def excel_to_rdf(
     # validate the RDF file
     shacl_graph = Graph().parse(Path(__file__).parent / "vocpub-5.1.ttl")
     v = shacl_validate(g, shacl_graph=shacl_graph, allow_warnings=True)
-    print(v[2])
     if not v[0]:
-        raise ConversionError(v[2])
+        return return_error(ShaclValidationError(v[2], v[1]), error_format)
 
-    if output_file_path is not None:
-        g.serialize(destination=str(output_file_path), format="longturtle")
+    if output_file is not None:
+        g.serialize(destination=str(output_file), format="longturtle")
     else:  # print to std out
         if output_format == "graph":
             return g
         else:
-            return g.serialize(format=output_format)
+            return g.serialize(format="longturtle")
 
 
 def rdf_to_excel(
-    rdf_file: Path, output_file_path: Optional[Path] = None, template_version="0.8.4"
+    rdf_file: Path,
+    output_file: Optional[Path] = None,
+    template_version="0.8.4",
+    output_format: TypeLiteral["blob", "file"] = "file",
+    error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ):
     # value checkers
     if not rdf_file.name.endswith(tuple(RDF_FILE_ENDINGS.keys())):
-        raise ValueError(
+        error = ValueError(
             "Files for conversion to Excel must end with one of the RDF file formats: '{}'".format(
                 "', '".join(RDF_FILE_ENDINGS.keys())
             )
         )
+        return return_error(error, error_format)
 
-    if output_file_path is not None:
-        if not output_file_path.suffix == ".xlsx":
-            raise ValueError(
-                "If specifying an output_file_path, it must end with .xlsx"
+    if output_file is not None:
+        if not Path(output_file).suffix == ".xlsx":
+            error = ValueError(
+                "If specifying an output_file, it must end with .xlsx"
             )
+            return return_error(error, error_format)
 
     if template_version not in ["0.8.4", "0.8.4.GA"]:
-        raise ValueError(
+        error = ValueError(
             f"This converter can only handle templates with versions 0.8.4 or 0.8.4.GA, not {template_version}"
         )
+        return return_error(error, error_format)
+
+    allowed_output_formats = ["blob", "file"]
+    if output_format not in allowed_output_formats:
+        error = ValueError(
+            f"output_format must be on of {', '.join(allowed_output_formats)}, not {output_format}"
+        )
+        return return_error(error, error_format)
+
+    allowed_error_formats = ["python", "cmd", "json"]
+    if error_format not in allowed_error_formats:
+        error = ValueError(
+            f"error_format must be on of {', '.join(allowed_error_formats)}, not {error_format}"
+        )
+        return return_error(error, error_format)
 
     # load the RDF file
-    g = Graph().parse(str(rdf_file), format=RDF_FILE_ENDINGS[rdf_file.suffix])
+    try:
+        g = Graph().parse(str(rdf_file), format=RDF_FILE_ENDINGS[rdf_file.suffix])
+    except Exception as e:
+        return return_error(e, error_format)
+
     g.bind("ex", "http://example.com/")
     ns = g.namespace_manager
 
@@ -383,7 +491,7 @@ def rdf_to_excel(
     shacl_graph = Graph().parse(Path(__file__).parent / "vocpub-5.1.ttl")
     v = shacl_validate(g, shacl_graph=shacl_graph, allow_warnings=True)
     if not v[0]:
-        raise ConversionError(v[2])
+        return return_error(ShaclValidationError(v[2], v[1]), error_format)
 
     # load the template
     fn = (
@@ -599,10 +707,11 @@ def rdf_to_excel(
             xl_hyperlink(ws[f"B{r}"], ns)
             r += 1
 
-    # save the output
-    if output_file_path is None:
-        wb.save(str(rdf_file.with_suffix(".xlsx")))
+    if output_format == "blob":
+        return wb
     else:
-        wb.save(str(output_file_path))
-
-
+        # save the output
+        if output_file is None:
+            wb.save(str(rdf_file.with_suffix(".xlsx")))
+        else:
+            wb.save(str(output_file))

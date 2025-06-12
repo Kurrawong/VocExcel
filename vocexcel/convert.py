@@ -1,10 +1,11 @@
 import argparse
-import logging
 import sys
 import warnings
 from pathlib import Path
 from typing import BinaryIO, Literal, Optional
+from typing import Literal as TypeLiteral
 
+from openpyxl.workbook import Workbook
 from pydantic import ValidationError
 
 warnings.simplefilter(action="ignore", category=UserWarning)
@@ -50,7 +51,8 @@ from vocexcel.utils import (
     get_template_version,
     load_workbook,
     validate_with_profile,
-    KNOWN_TEMPLATE_VERSIONS
+    KNOWN_TEMPLATE_VERSIONS,
+    return_error
 )
 
 TEMPLATE_VERSION = None
@@ -60,29 +62,36 @@ def excel_to_rdf(
     input_file_path: Path | BinaryIO,
     profile="vocpub-49",
     sheet_name: Optional[str] = None,
-    output_file_path: Optional[Path] = None,
-    output_format: Literal["turtle", "xml", "json-ld", "graph"] = "longturtle",
+    output_file: Optional[Path] = None,
+    output_format: Literal["rdf", "graph"] = "rdf",
     error_level=1,  # TODO: list Literal possible values
     message_level=1,  # TODO: list Literal possible values
     log_file: Optional[Path] = None,
     validate: Optional[bool] = False,
+    error_format: TypeLiteral["python", "cmd", "json"] = "python"
 ):
     """Converts a sheet within an Excel workbook to an RDF file"""
-    wb = load_workbook(input_file_path)
-    template_version = get_template_version(wb)
+    wb = load_workbook(input_file_path, error_format)
+    if not isinstance(wb, Workbook):
+        return wb
+
+    template_version = get_template_version(wb, error_format)
+    if template_version not in KNOWN_TEMPLATE_VERSIONS:
+        return template_version
 
     if template_version in ["0.8.4", "0.8.4.GA"]:
         return excel_to_rdf_084(
             wb,
-            output_file_path,
-            output_format,
+            output_file,
             template_version,
+            output_format,
+            error_format
         )
 
     elif template_version in ["0.7.1"]:
         return excel_to_rdf_070(
             wb,
-            output_file_path,
+            output_file,
             output_format,
             validate,
             profile,
@@ -95,7 +104,7 @@ def excel_to_rdf(
     elif template_version in ["0.7.0"]:
         return excel_to_rdf_070(
             wb,
-            output_file_path,
+            output_file,
             output_format,
             validate,
             profile,
@@ -109,7 +118,7 @@ def excel_to_rdf(
     elif template_version in ["0.6.2", "0.6.3"]:
         return excel_to_rdf_063(
             wb,
-            output_file_path,
+            output_file,
             output_format,
             validate,
             profile,
@@ -122,7 +131,7 @@ def excel_to_rdf(
     elif template_version in ["0.5.0", "0.6.0", "0.6.1"]:
         return excel_to_rdf_060(
             wb,
-            output_file_path,
+            output_file,
             output_format,
             validate,
             profile,
@@ -196,23 +205,13 @@ def excel_to_rdf(
             log_file=log_file,
         )
 
-    if output_file_path is not None:
-        vocab_graph.serialize(destination=str(output_file_path), format=output_format)
+    if output_file is not None:
+        vocab_graph.serialize(destination=str(output_file), format="longturtle")
     else:  # print to std out
         if output_format == "graph":
             return vocab_graph
         else:
-            return vocab_graph.serialize(format=output_format)
-
-
-def rdf_to_excel(
-    rdf_file: Path, output_file_path: Optional[Path] = None, template_version="0.8.0"
-):
-    rdf_to_excel_084(
-        rdf_file,
-        output_file_path,
-        template_version,
-    )
+            return vocab_graph.serialize(format="longturtle")
 
 
 def main(args=None):
@@ -220,7 +219,7 @@ def main(args=None):
         args = sys.argv[1:]
 
     if args is None or args == []:
-        raise ValueError("You must supply the path to an Excel file to convert to RDF")
+        return return_error(ValueError("You must supply the path to a file to convert"), "cmd")
 
     parser = argparse.ArgumentParser(
         prog="vocexcel", formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -265,12 +264,12 @@ def main(args=None):
         )
     elif args.input_file:
         if not args.input_file.suffix.lower().endswith(tuple(KNOWN_FILE_ENDINGS)):
-            print(
+            error = ValueError(
                 "Files for conversion must either end with .xlsx (Excel) or one of the known RDF file endings, '{}'".format(
                     "', '".join(RDF_FILE_ENDINGS.keys())
                 )
             )
-            parser.exit()
+            return return_error(error, "cmd")
 
         print(f"Processing file {args.input_file}")
 
@@ -281,7 +280,7 @@ def main(args=None):
                     args.input_file,
                     profile=None,
                     sheet_name=None,
-                    output_file_path=args.outputfile,
+                    output_file=args.outputfile,
                     output_format=None,
                     error_level=None,
                     message_level=None,
@@ -290,16 +289,18 @@ def main(args=None):
                 )
                 if args.outputfile is None:
                     print(o)
-            except ConversionError as err:
-                logging.error("{0}".format(err))
-                return 1
+            except Exception as e:
+                return return_error(e, "cmd")
 
         # RDF file ending, so convert RDF -> Excel
         else:
-            rdf_to_excel(
+            rdf_to_excel_084(
                 args.input_file,
-                output_file_path=args.outputfile,
+                output_file=args.outputfile,
+                output_format="file",
+                error_format="cmd"
             )
+
             if args.outputfile is None:
                 print(f"Converted result at {args.input_file.with_suffix('.xlsx')}")
             else:

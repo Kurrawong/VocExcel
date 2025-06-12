@@ -376,8 +376,8 @@ def excel_to_rdf(
     wb: Workbook,
     output_file_path: Optional[Path] = None,
     output_format: TypeLiteral[
-        "longturtle", "turtle", "xml", "json-ld", "graph"
-    ] = "longturtle",
+        "rdf", "graph"
+    ] = "rdf",
     validate: bool = False,
     profile="vocpub-46",
     error_level=1,
@@ -410,9 +410,9 @@ def excel_to_rdf(
         )
 
     if output_file_path is not None:
-        g.serialize(destination=str(output_file_path), format=output_format)
+        g.serialize(destination=str(output_file_path), format="longturtle")
     else:  # print to std out
         if output_format == "graph":
             return g
         else:
-            return g.serialize(format=output_format)
+            return g.serialize(format="longturtle")

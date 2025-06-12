@@ -1,8 +1,10 @@
+import json
 import logging
 import re
 from pathlib import Path
 from tempfile import SpooledTemporaryFile
 from typing import Dict, Tuple, Union
+from typing import Literal as TypeLiteral
 
 import pyshacl
 from colorama import Fore, Style
@@ -12,7 +14,7 @@ from openpyxl.workbook.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from pyshacl.pytypes import GraphLike
 from rdflib import BNode, Graph, Literal, Namespace, Node, URIRef
-from rdflib.namespace import DCTERMS, PROV, RDF, SDO, SKOS, XSD
+from rdflib.namespace import DCTERMS, PROV, RDF, SDO, SH, SKOS, XSD
 
 EXCEL_FILE_ENDINGS = ["xlsx"]
 RDF_FILE_ENDINGS = {
@@ -75,30 +77,28 @@ class ConversionError(Exception):
     pass
 
 
-def load_workbook(file_path: Path) -> Workbook:
+class ShaclValidationError(ConversionError):
+    def __init__(self, message, graph: Graph):
+        super().__init__(message)
+        self.graph = graph
+
+
+def load_workbook(file_path: Path, error_format: TypeLiteral["python", "cmd", "json"] = "python") -> Workbook|str|None:
     if not isinstance(
         file_path, SpooledTemporaryFile
     ) and not file_path.name.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
-        raise ValueError("Files for conversion to RDF must be Excel files ending .xlsx")
+        error = ValueError("Files for conversion to RDF must be Excel files ending .xlsx")
+        return return_error(error, error_format)
     return _load_workbook(filename=file_path, data_only=True)
 
 
-def load_template(file_path: Path) -> Workbook:
-    if not file_path.name.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
-        raise ValueError(
-            "Template files for RDF-to-Excel conversion must be Excel files ending .xlsx"
-        )
-
-    return _load_workbook(filename=str(file_path), data_only=True)
-
-
-def get_template_version(wb: Workbook) -> str:
+def get_template_version(wb: Workbook, error_format: TypeLiteral["python", "cmd", "json"] = "python") -> str:
     # try 0.4.0, 0.5.0 & 0.6.x locations
     def find_version(wb: Workbook):
         try:
             if "Introduction" in wb.sheetnames:
                 intro_sheet = wb["Introduction"]
-                if intro_sheet["E4"].value is not None:  # 0.5.0, 0.6.x
+                if intro_sheet["E4"].value is not None:  # 0.5.0, 0.6.x, 0.7.x, 0.8.x
                     return intro_sheet["E4"].value
                 if intro_sheet["J11"].value is not None:  # 0.4.0
                     return intro_sheet["J11"].value
@@ -114,13 +114,15 @@ def get_template_version(wb: Workbook) -> str:
     if version in KNOWN_TEMPLATE_VERSIONS:
         return version
     elif version is not None:
-        raise ConversionError(
+        error = ConversionError(
             f"The version of your template, {version}, is not supported"
         )
+        return return_error(error, error_format)
     # if we get here, the template version is either unknown or can't be located
-    raise Exception(
+    error = ConversionError(
         "The version of the Excel template you are using cannot be determined"
     )
+    return return_error(error, error_format)
 
 
 def split_and_tidy_to_strings(s: str):
@@ -398,3 +400,48 @@ def fill_cell_with_list_of_curies(
         xs.append(x)
     ws[cell_id] = ",\n".join([g.namespace_manager.curie(z) for z in xs])
     ws[cell_id].font = Font(size=14)
+
+
+def return_error(error, error_output_format: TypeLiteral["python", "cmd", "json"] = "python") -> str:
+    if error_output_format == "python":
+        raise error
+
+    if isinstance(error, ShaclValidationError):
+        error_message = "RDF Validation Error"
+        error_body = format_shacl_error(error.graph, error_output_format)
+    else:
+        error_message = type(error).__name__
+        error_body = str(error)
+
+    if error_output_format == "json":
+        return json.dumps({
+            "error": error_message,
+            "message": error_body,
+        })
+    elif error_output_format == "cmd":
+        print(f"ERROR: {error_message}")
+        print(error_body)
+        return
+
+
+def format_shacl_error(error_graph: Graph, output_format: TypeLiteral["python", "cmd", "json"] = "python") -> Graph|str|list:
+    if output_format == "python":
+        return error_graph
+    else:
+        individual_results = []
+        for vr in error_graph.subjects(RDF.type, SH.ValidationResult):
+            fn = None
+            m = None
+            for p, o in error_graph.predicate_objects(vr):
+                if p == SH.focusNode:
+                    fn = o
+                elif p == SH.resultMessage:
+                    m = o
+            individual_results.append((fn, m))
+        if output_format == "cmd":
+            s = f"No. of errors: {len(individual_results)}\n\n"
+            for fn, m in individual_results:
+                s += f"* {fn}:\n\t{m}\n\n"
+            return s
+        else:  # json
+            return individual_results

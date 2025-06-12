@@ -1,8 +1,12 @@
+import json
 import sys
 from pathlib import Path
 
-from rdflib import Graph, Literal, URIRef
-from rdflib.namespace import SDO, SKOS, XSD
+from rdflib import Literal, URIRef
+from rdflib.namespace import SDO, XSD
+import pytest
+
+from vocexcel.utils import ConversionError
 
 sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from vocexcel import convert
@@ -56,3 +60,61 @@ def test_084GA():
         SDO.identifier,
         Literal("https://pid.geoscience.gov.au/dataset/1234", datatype=XSD.anyURI),
     ) in g
+
+
+def test_084_errors(capsys):
+    XL_FILE = TESTS_DATA_DIR_PATH / "084GA.xlsz"
+    ERROR_TXT = "Files for conversion to RDF must be Excel files ending .xlsx"
+
+    with pytest.raises(ValueError):
+        g = convert.excel_to_rdf(XL_FILE)  # error_format = "python"
+
+    convert.excel_to_rdf(XL_FILE, error_format="cmd")
+    assert ERROR_TXT in capsys.readouterr().out
+
+    j = convert.excel_to_rdf(XL_FILE, error_format="json")
+    assert ERROR_TXT in j
+    p = json.loads(j)
+    assert ERROR_TXT in p["message"]
+
+    XL_FILE = TESTS_DATA_DIR_PATH / "080.xlsx"
+    ERROR_TXT = "The version of your template, 0.8.0, is not supported"
+
+    with pytest.raises(ConversionError):
+        g = convert.excel_to_rdf(XL_FILE)  # error_format = "python"
+
+    convert.excel_to_rdf(XL_FILE, error_format="cmd")
+    assert ERROR_TXT in capsys.readouterr().out
+
+    j = convert.excel_to_rdf(XL_FILE, error_format="json")
+    assert ERROR_TXT in j
+    p = json.loads(j)
+    assert ERROR_TXT in p["message"]
+
+    XL_FILE = TESTS_DATA_DIR_PATH / "084_invalid.xlsx"
+    ERROR_TXT = "Your vocabulary has no creator. Please add it to the Concept Scheme sheet"
+
+    with pytest.raises(ConversionError):
+        g = convert.excel_to_rdf(XL_FILE)  # error_format = "python"
+
+    convert.excel_to_rdf(XL_FILE, error_format="cmd")
+    assert ERROR_TXT in capsys.readouterr().out
+
+    j = convert.excel_to_rdf(XL_FILE, error_format="json")
+    assert ERROR_TXT in j
+    p = json.loads(j)
+    assert ERROR_TXT in p["message"]
+
+    XL_FILE = TESTS_DATA_DIR_PATH / "084_invalid2.xlsx"
+    ERROR_TXT = "Your namespace value on sheet Prefixes, cell C5 is invalid. It must start with 'http'"
+
+    with pytest.raises(ConversionError):
+        g = convert.excel_to_rdf(XL_FILE)  # error_format = "python"
+
+    convert.excel_to_rdf(XL_FILE, error_format="cmd")
+    assert ERROR_TXT in capsys.readouterr().out
+
+    j = convert.excel_to_rdf(XL_FILE, error_format="json")
+    assert ERROR_TXT in j
+    p = json.loads(j)
+    assert ERROR_TXT in p["message"]
