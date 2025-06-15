@@ -20,13 +20,13 @@ The process to create an RDF vocabulary from an Excel template is:
 
 === Templates
 
-The template files in this repository's *templates/* folder are to be used to create vocabularies. The templates hopefully contain all the information needed to understand how to fill them in.
+The template files in this repository's *vocexcel/templates/* folder are to be used to create vocabularies. The templates hopefully contain all the information needed to understand how to fill them in.
 
 Use one Excel workbook per vocabulary.
 
 === Latest Template
 
-* **templates/VocExcel-template-080.xlsx**
+* **vocexcel/templates/VocExcel-template-085.xlsx**
 
 Unless you have a good reason to do something different, please use the latest version of the template.
 
@@ -34,9 +34,9 @@ Older templates still convert, so if you've used one and like it, keep using it.
 
 === Examples
 
-Example filled-in templates versions are given in the `tests/data/` folder. Just ensure you're looking at examples prefixed with the same template version you are after, e.g. 0.8.0 = 080.xlsx.
+Example filled-in templates versions are given in the `tests/data/` folder. Just ensure you're looking at examples prefixed with the same template version you are after, e.g. 0.8.5 = 085.xlsx.
 
-As per _semantic versioning_, a template of 0.8.2 will work with 0.8.0. 
+As per _semantic versioning_, a template of 0.8.2 will work with 0.8.5. 
 
 == Processing
 
@@ -44,7 +44,7 @@ To process an Excel template, you will need to either:
 
 * run the VocExcel Python script, or
 * use an online tool
-** for example https://tools.dev.kurrawong.ai/vocexcel
+** for example https://tools.kurrawong.ai/tools/vocexcel
 
 The Python script can also run as a Python module, i.e. within a larger Python workflow.
 
@@ -55,7 +55,7 @@ You will need to:
 1. have Python installed on your computer
 * 3.10+ required
 2. install the required packages in your main Python environment or a virtual environment
-    * you can use the https://python-poetry.org/docs/basic-usage/[Poetry] tool with the _pyproject.toml_ file to install required Python packages
+    * you can use the https://docs.astral.sh/uv/[uv] tool Python build tool with the _pyproject.toml_ file to install required Python packages
 
 === Running
 
@@ -76,13 +76,13 @@ vocexel some-excel-file.xlsx
 An example, using one of the test data files to convert from Excel to RDF:
 
 ----
-python convert.py tests/data/080.xlsx
+python convert.py tests/data/085.xlsx
 ----
 
 To convert the other way - RDF to Excel - from with you'll get a v0.8.x template result:
 
 ----
-python convert.py tests/data/080_rdf.ttl
+python convert.py tests/data/085_rdf.ttl
 ----
 
 The command line argument options can be found by typing:
@@ -123,9 +123,7 @@ excel_to_rdf(Path(".") / "path" / "to" / "vocab-file.ttl")
 
 ==== Online
 
-https://kurrawong.ai[KurrawongAI] maintains an online VocExcel tool at https://tools.dev.kurrawong.ai/vocexcel
-
-This repository also contains code to run your own online converter, see the [Vue.js] application in the _vocexcel-ui/_ folder and the Python application server in the _vocexcel/web/_ folder.
+https://kurrawong.ai[KurrawongAI] maintains an online VocExcel tool at https://tools.dev.kurrawong.ai/tools/vocexcel
 
 == License
 
