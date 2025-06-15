@@ -14,7 +14,7 @@ from vocexcel.convert_071 import (
 )
 from vocexcel.utils import ConversionError, load_workbook
 
-TEMPLATES_DIR_PATH = Path(__file__).parent.parent.absolute() / "templates"
+TEMPLATES_DIR_PATH = Path(__file__).parent.parent.absolute() / "vocexcel/templates"
 TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 

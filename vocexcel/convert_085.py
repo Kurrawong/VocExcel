@@ -60,7 +60,7 @@ def extract_prefixes(sheet: Worksheet, error_format: TypeLiteral["python", "cmd"
 
 
 def extract_concept_scheme(
-    sheet: Worksheet, prefixes, template_version="0.8.4", error_format: TypeLiteral["python", "cmd", "json"] = "python",
+    sheet: Worksheet, prefixes, template_version="0.8.5", error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ) -> tuple[Graph, str]:
     iri_s = sheet["B3"].value
     title = sheet["B4"].value
@@ -77,7 +77,7 @@ def extract_concept_scheme(
     voc_der_mod = sheet["B15"].value
     themes = split_and_tidy_to_strings(sheet["B16"].value)
     status = sheet["B17"].value
-    if template_version == "0.8.4.GA":
+    if template_version == "0.8.5.GA":
         catalogue_pid = sheet["B18"].value
 
     if iri_s is None:
@@ -158,7 +158,7 @@ def extract_concept_scheme(
         )
         return return_error(error, error_format)
 
-    if template_version == "0.8.4.GA":
+    if template_version == "0.8.5.GA":
         if catalogue_pid is None or not str(catalogue_pid).startswith(
             "https://pid.geoscience.gov.au/"
         ):
@@ -212,7 +212,7 @@ def extract_concept_scheme(
     if status is not None:
         g.add((iri, SDO.status, URIRef(STATUSES[status])))
 
-    if template_version == "0.8.4.GA":
+    if template_version == "0.8.5.GA":
         g.add((iri, SDO.identifier, Literal(catalogue_pid, datatype=XSD.anyURI)))
 
     bind_namespaces(g, prefixes)
@@ -350,7 +350,7 @@ def extract_additions_concept_properties(sheet: Worksheet, prefixes, error_forma
 def excel_to_rdf(
     wb: Workbook,
     output_file: Optional[Path] = None,
-    template_version: str ="0.8.4",
+    template_version: str ="0.8.5",
     output_format: TypeLiteral["graph", "rdf", ] = "rdf",
     error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ):
@@ -381,7 +381,7 @@ def excel_to_rdf(
             )
             return return_error(error, error_format)
 
-    if template_version not in ["0.8.4", "0.8.4.GA"]:
+    if template_version not in ["0.8.5", "0.8.5.GA"]:
         error = ValueError(
             f"This converter can only handle templates with versions 0.8.x or 0.8.x.GA, not {template_version}"
         )
@@ -449,7 +449,7 @@ def excel_to_rdf(
 def rdf_to_excel(
     rdf_file: Path,
     output_file: Optional[Path] = None,
-    template_version="0.8.4",
+    template_version="0.8.5",
     output_format: TypeLiteral["blob", "file"] = "file",
     error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ):
@@ -458,7 +458,7 @@ def rdf_to_excel(
     Parameters:
         rdf_file: Required. An RDF file in one of the common formats understood by RDFLib
         output_file: Optional, default none. A name for an Excel file to output. Must end in .xlsx. Not used if output_format set to blob
-        template_version: Optional, default 0.8.4. Currently only 0.8.4 and 0.8.4.GA are supported
+        template_version: Optional, default 0.8.5. Currently only 0.8.5 and 0.8.5.GA are supported
         output_format: Optional, default file. Whether to return a binary blob (openpyxl Workbook instance) or write results to file.
         error_format: Optional, default python. the kind of errors to return: python is Python, cmd is command line-formatted string, json is stringified JSON
 
@@ -482,9 +482,9 @@ def rdf_to_excel(
             )
             return return_error(error, error_format)
 
-    if template_version not in ["0.8.4", "0.8.4.GA"]:
+    if template_version not in ["0.8.5", "0.8.5.GA"]:
         error = ValueError(
-            f"This converter can only handle templates with versions 0.8.4 or 0.8.4.GA, not {template_version}"
+            f"This converter can only handle templates with versions 0.8.5 or 0.8.5.GA, not {template_version}"
         )
         return return_error(error, error_format)
 
@@ -520,10 +520,10 @@ def rdf_to_excel(
     # load the template
     fn = (
         "VocExcel-template-080-GA.xlsx"
-        if template_version == "0.8.4.GA"
-        else "VocExcel-template-084.xlsx"
+        if template_version == "0.8.5.GA"
+        else "VocExcel-template-085.xlsx"
     )
-    wb = load_workbook(Path(__file__).parent.parent / "templates" / fn)
+    wb = load_workbook(Path(__file__).parent / "templates" / fn)
 
     # Concept Scheme
     ws = wb["Concept Scheme"]
@@ -574,7 +574,7 @@ def rdf_to_excel(
         [str(x) for x in g.objects(subject=cs_iri, predicate=SDO.keywords)]
     )
     ws["B17"] = str(g.value(subject=cs_iri, predicate=SDO.status)).split("/")[-1]
-    if template_version == "0.8.4.GA":
+    if template_version == "0.8.5.GA":
         ws["B18"] = str(g.value(subject=cs_iri, predicate=SDO.identifier))
 
     # Concepts

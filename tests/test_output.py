@@ -7,15 +7,13 @@ sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from rdflib import URIRef
 from rdflib.namespace import SKOS
 
-from vocexcel import convert
-
 TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 
 def test_example_complex():
     from vocexcel.convert_030 import extract_concept_scheme, extract_concepts_and_collections
     from vocexcel import models
-    wb = vocexcel.utils.load_workbook(Path(__file__).parent.parent.resolve() / "templates" / "VocExcel-template-030.xlsx")
+    wb = vocexcel.utils.load_workbook(Path(__file__).parent.parent.resolve() / "vocexcel/templates" / "VocExcel-template-030.xlsx")
 
     sheet = wb["example - complex"]
     cs = extract_concept_scheme(sheet)

@@ -9,7 +9,7 @@ sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from vocexcel import convert
 from vocexcel.utils import ConversionError
 
-TEMPLATES_DIR_PATH = Path(__file__).parent.parent.absolute() / "templates"
+TEMPLATES_DIR_PATH = Path(__file__).parent.parent.absolute() / "vocexcel/templates"
 TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 

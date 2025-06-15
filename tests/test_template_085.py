@@ -11,12 +11,12 @@ from vocexcel.utils import ConversionError
 sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from vocexcel import convert
 
-TEMPLATES_DIR_PATH = Path(__file__).parent.parent.absolute() / "templates"
+TEMPLATES_DIR_PATH = Path(__file__).parent.parent.absolute() / "vocexcel/templates"
 TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 
-def test_084():
-    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "084.xlsx", output_format="graph")
+def test_085():
+    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "085.xlsx", output_format="graph")
 
     assert (
         URIRef("http://example.com/voc/myvoc"),
@@ -46,8 +46,8 @@ def test_084():
     ) in g
 
 
-def test_084GA():
-    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "084GA.xlsx", output_format="graph")
+def test_085GA():
+    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "085GA.xlsx", output_format="graph")
 
     assert (
         URIRef("http://example.com/voc/myvoc"),
@@ -62,8 +62,8 @@ def test_084GA():
     ) in g
 
 
-def test_084_errors(capsys):
-    XL_FILE = TESTS_DATA_DIR_PATH / "084GA.xlsz"
+def test_085_errors(capsys):
+    XL_FILE = TESTS_DATA_DIR_PATH / "085GA.xlsz"
     ERROR_TXT = "Files for conversion to RDF must be Excel files ending .xlsx"
 
     with pytest.raises(ValueError):
@@ -91,7 +91,7 @@ def test_084_errors(capsys):
     p = json.loads(j)
     assert ERROR_TXT in p["message"]
 
-    XL_FILE = TESTS_DATA_DIR_PATH / "084_invalid.xlsx"
+    XL_FILE = TESTS_DATA_DIR_PATH / "085_invalid.xlsx"
     ERROR_TXT = "Your vocabulary has no creator. Please add it to the Concept Scheme sheet"
 
     with pytest.raises(ConversionError):
@@ -105,7 +105,7 @@ def test_084_errors(capsys):
     p = json.loads(j)
     assert ERROR_TXT in p["message"]
 
-    XL_FILE = TESTS_DATA_DIR_PATH / "084_invalid2.xlsx"
+    XL_FILE = TESTS_DATA_DIR_PATH / "085_invalid2.xlsx"
     ERROR_TXT = "Your namespace value on sheet Prefixes, cell C5 is invalid. It must start with 'http'"
 
     with pytest.raises(ConversionError):

@@ -41,8 +41,8 @@ from vocexcel.convert_043 import (
 from vocexcel.convert_060 import excel_to_rdf as excel_to_rdf_060
 from vocexcel.convert_063 import excel_to_rdf as excel_to_rdf_063
 from vocexcel.convert_070 import excel_to_rdf as excel_to_rdf_070
-from vocexcel.convert_084 import excel_to_rdf as excel_to_rdf_084
-from vocexcel.convert_084 import rdf_to_excel as rdf_to_excel_084
+from vocexcel.convert_085 import excel_to_rdf as excel_to_rdf_085
+from vocexcel.convert_085 import rdf_to_excel as rdf_to_excel_085
 from vocexcel.utils import (
     EXCEL_FILE_ENDINGS,
     KNOWN_FILE_ENDINGS,
@@ -82,8 +82,8 @@ def excel_to_rdf(
     if template_version not in KNOWN_TEMPLATE_VERSIONS:
         return template_version
 
-    if template_version in ["0.8.4", "0.8.4.GA"]:
-        return excel_to_rdf_084(
+    if template_version in ["0.8.5", "0.8.5.GA"]:
+        return excel_to_rdf_085(
             wb,
             output_file,
             template_version,
@@ -193,7 +193,7 @@ def excel_to_rdf(
 def rdf_to_excel(
     rdf_file: Path,
     output_file: Optional[Path] = None,
-    template_version="0.8.4",
+    template_version="0.8.5",
     output_format: TypeLiteral["blob", "file"] = "file",
     error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ):
@@ -202,14 +202,14 @@ def rdf_to_excel(
     Parameters:
         rdf_file: Required. An RDF file in one of the common formats understood by RDFLib
         output_file: Optional, default none. A name for an Excel file to output. Must end in .xlsx. Not used if output_format set to blob
-        template_version: Optional, default 0.8.4. Currently only 0.8.4 and 0.8.4.GA are supported
+        template_version: Optional, default 0.8.5. Currently only 0.8.5 and 0.8.5.GA are supported
         output_format: Optional, default file. Whether to return a binary blob (openpyxl Workbook instance) or write results to file.
         error_format: Optional, default python. the kind of errors to return: python is Python, cmd is command line-formatted string, json is stringified JSON
 
     Returns:
         output_format or an error in one of the error_formats
     """
-    return rdf_to_excel_084(
+    return rdf_to_excel_085(
         rdf_file,
         output_file,
         template_version,

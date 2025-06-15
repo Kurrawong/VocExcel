@@ -8,8 +8,8 @@ from rdflib import SDO, SKOS, Literal, URIRef
 from vocexcel.convert import excel_to_rdf, rdf_to_excel
 from vocexcel.utils import STATUSES, load_workbook, ShaclValidationError
 
-def test_basic_084():
-    RDF_FILE = Path(__file__).parent / "data" / "084_rdf.ttl"
+def test_basic_085():
+    RDF_FILE = Path(__file__).parent / "data" / "085_rdf.ttl"
     XL_FILE = RDF_FILE.with_suffix(".xlsx")
     rdf_to_excel(RDF_FILE, output_file=XL_FILE)
 
@@ -46,8 +46,8 @@ def test_basic_084():
     XL_FILE.unlink(missing_ok=True)
 
 
-def test_basic_084GA():
-    RDF_FILE = Path(__file__).parent / "data" / "084GA_rdf.ttl"
+def test_basic_085GA():
+    RDF_FILE = Path(__file__).parent / "data" / "085GA_rdf.ttl"
     XL_FILE = RDF_FILE.with_suffix(".xlsx")
     rdf_to_excel(RDF_FILE, output_file=XL_FILE)
 
@@ -69,7 +69,7 @@ def test_basic_084GA():
 
 
 def test_error_responses(capsys):
-    RDF_FILE = Path(__file__).parent / "data" / "084_rdf_invalid.ttl"
+    RDF_FILE = Path(__file__).parent / "data" / "085_rdf_invalid.ttl"
     XL_FILE = RDF_FILE.with_suffix(".xlsx")
 
     # :completely_cemented_duricrust - no definition
@@ -106,7 +106,7 @@ def test_error_responses(capsys):
 
 
 def test_return_formats():
-    RDF_FILE = Path(__file__).parent / "data" / "084_rdf.ttl"
+    RDF_FILE = Path(__file__).parent / "data" / "085_rdf.ttl"
     XL_FILE = RDF_FILE.with_suffix(".xlsx")
 
     # with pytest.raises(ValueError):
