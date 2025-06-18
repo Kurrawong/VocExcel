@@ -60,6 +60,7 @@ TEMPLATE_VERSION = None
 def excel_to_rdf(
     excel_file: Path | BinaryIO,
     output_file: Optional[Path] = None,
+    allowed_template_versions=None,
     output_format: Literal["rdf", "graph"] = "rdf",
     error_format: TypeLiteral["python", "cmd", "json"] = "python"
 ):
@@ -67,7 +68,8 @@ def excel_to_rdf(
 
     Parameters:
         excel_file: The Excel workbook file to convert
-        output_file: Optional. If set, the RDF output will be written to this file in the turtle format.
+        output_file: Optional. If set, the RDF output will be written to this file in the turtle format
+        allowed_template_versions: Optional. User-specified list of allowed template versions. If not given, all versions allowed
         output_format: Optional, default rdf. rdf: return serialized RDF in the turtle format, graph: return an RDFLib Graph object
         error_format: Optional, default python. the kind of errors to return: python is Python, cmd is command line-formatted string, json is stringified JSON
 
@@ -78,52 +80,58 @@ def excel_to_rdf(
     if not isinstance(wb, Workbook):
         return wb
 
-    template_version = get_template_version(wb, error_format)
-    if template_version not in KNOWN_TEMPLATE_VERSIONS:
-        return template_version
+    actual_template_version = get_template_version(wb, error_format)
 
-    if template_version in ["0.8.5", "0.8.5.GA"]:
+    if allowed_template_versions is not None:
+        if actual_template_version not in allowed_template_versions:
+            error = ValueError(f"You have restricted the allowed template versions to {', '.join(allowed_template_versions)} but supplied a template of version {actual_template_version}")
+            return return_error(error, error_format)
+    elif actual_template_version not in KNOWN_TEMPLATE_VERSIONS:
+        error = ConversionError(f"Unknown template version: {actual_template_version}. Must be one of {', '.join(KNOWN_TEMPLATE_VERSIONS)}")
+        return return_error(error, error_format)
+
+    if actual_template_version in ["0.8.5", "0.8.5.GA"]:
         return excel_to_rdf_085(
             wb,
             output_file,
-            template_version,
+            actual_template_version,
             output_format,
             error_format
         )
 
-    elif template_version in ["0.7.1"]:
+    elif actual_template_version in ["0.7.1"]:
         return excel_to_rdf_070(
             wb,
             output_file,
             output_format,
-            template_version=template_version,
+            template_version=actual_template_version,
         )
 
-    elif template_version in ["0.7.0"]:
+    elif actual_template_version in ["0.7.0"]:
         return excel_to_rdf_070(
             wb,
             output_file,
             output_format,
-            template_version=template_version,
+            template_version=actual_template_version,
         )
 
     # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
-    elif template_version in ["0.6.2", "0.6.3"]:
+    elif actual_template_version in ["0.6.2", "0.6.3"]:
         return excel_to_rdf_063(
             wb,
             output_file,
             "longturtle" if output_format == "rdf" else "graph",
-            template_version=template_version,
+            template_version=actual_template_version,
         )
 
-    elif template_version in ["0.5.0", "0.6.0", "0.6.1"]:
+    elif actual_template_version in ["0.5.0", "0.6.0", "0.6.1"]:
         return excel_to_rdf_060(
             wb,
             output_file,
             "longturtle" if output_format == "rdf" else "graph",
         )
 
-    elif template_version in ["0.4.3", "0.4.4"]:
+    elif actual_template_version in ["0.4.3", "0.4.4"]:
         try:
             sheet = wb["Concept Scheme"]
             concept_sheet = wb["Concepts"]
@@ -139,13 +147,13 @@ def excel_to_rdf(
         except ValidationError as e:
             raise ConversionError(f"ConceptScheme processing error: {e}")
 
-    elif template_version == "0.3.0" or template_version == "0.2.1":
+    elif actual_template_version == "0.3.0" or actual_template_version == "0.2.1":
         sheet = wb["vocabulary"]
         # read from the vocabulary sheet of the workbook unless given a specific sheet
 
-        if template_version == "0.2.1":
+        if actual_template_version == "0.2.1":
             concepts, collections = extract_concepts_and_collections_021(sheet)
-        elif template_version == "0.3.0":
+        elif actual_template_version == "0.3.0":
             concepts, collections = extract_concepts_and_collections_030(sheet)
 
         try:
@@ -154,9 +162,9 @@ def excel_to_rdf(
             raise ConversionError(f"ConceptScheme processing error: {e}")
 
     elif (
-        template_version == "0.4.0"
-        or template_version == "0.4.1"
-        or template_version == "0.4.2"
+            actual_template_version == "0.4.0"
+            or actual_template_version == "0.4.1"
+            or actual_template_version == "0.4.2"
     ):
         try:
             sheet = wb["Concept Scheme"]
@@ -171,10 +179,6 @@ def excel_to_rdf(
         except ValidationError as e:
             error = ConversionError(f"ConceptScheme processing error: {e}")
             return return_error(error, error_format)
-
-    else:
-        error = ConversionError(f"Unknown template version: {template_version}. Must be one of {', '.join(KNOWN_TEMPLATE_VERSIONS)}")
-        return return_error(error, error_format)
 
     # Build the total vocab
     vocab_graph = models.Vocabulary(
