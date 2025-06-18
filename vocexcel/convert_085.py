@@ -14,7 +14,6 @@ from vocexcel.convert_070 import (
     extract_additions_concept_properties as extract_additions_concept_properties_070,
 )
 from vocexcel.convert_070 import extract_collections as extract_collections_070
-from vocexcel.convert_070 import extract_prefixes as extract_prefixes_070
 from vocexcel.utils import (
     RDF_FILE_ENDINGS,
     STATUSES,

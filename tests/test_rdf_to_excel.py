@@ -8,6 +8,7 @@ from rdflib import SDO, SKOS, Literal, URIRef
 from vocexcel.convert import excel_to_rdf, rdf_to_excel
 from vocexcel.utils import STATUSES, load_workbook, ShaclValidationError
 
+
 def test_basic_085():
     RDF_FILE = Path(__file__).parent / "data" / "085_rdf.ttl"
     XL_FILE = RDF_FILE.with_suffix(".xlsx")

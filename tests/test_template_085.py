@@ -2,9 +2,9 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
 from rdflib import Literal, URIRef
 from rdflib.namespace import SDO, XSD
-import pytest
 
 from vocexcel.utils import ConversionError
 

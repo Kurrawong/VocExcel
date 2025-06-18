@@ -83,7 +83,10 @@ def excel_to_rdf(
     actual_template_version = get_template_version(wb, error_format)
 
     if allowed_template_versions is not None:
-        if actual_template_version not in allowed_template_versions:
+        if not set(allowed_template_versions).issubset(KNOWN_TEMPLATE_VERSIONS):
+            error = ValueError(f"You have restricted the allowed template versions to unknown template versions. Known template versions are {', '.join(KNOWN_TEMPLATE_VERSIONS)}")
+            return return_error(error, error_format)
+        elif actual_template_version not in allowed_template_versions:
             error = ValueError(f"You have restricted the allowed template versions to {', '.join(allowed_template_versions)} but supplied a template of version {actual_template_version}")
             return return_error(error, error_format)
     elif actual_template_version not in KNOWN_TEMPLATE_VERSIONS:
