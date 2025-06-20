@@ -518,7 +518,7 @@ def rdf_to_excel(
 
     # load the template
     fn = (
-        "VocExcel-template-080-GA.xlsx"
+        "VocExcel-template-085-GA.xlsx"
         if template_version == "0.8.5.GA"
         else "VocExcel-template-085.xlsx"
     )
