@@ -4,7 +4,7 @@
 Another Excel-to-RDF converter for SKOS vocabs, but one that:
 
 * uses fixed templates to keep it simple
-* meets particular SKOS profile outcomes (https://w3id.org/profile/vocpub[VocPub])
+* meets particular SKOS profile outcomes (https://linked.data.gov.au/def/vocpub[VocPub])
 * is under active development, production use, and is commercially supported
 
 An online version of VocExcel is available at https://tools.dev.kurrawong.ai/vocexcel.
