@@ -2,7 +2,6 @@ import datetime
 from itertools import chain
 from typing import List, Union
 
-import dateutil.parser
 from openpyxl import Workbook
 from pydantic import BaseModel, field_validator
 from rdflib import Graph, Literal, URIRef
@@ -36,13 +35,13 @@ class ConceptScheme(BaseModel):
     title: str
     description: str
     created: datetime.date
-    modified: datetime.date|None = None
+    modified: datetime.date | None = None
     creator: str
     publisher: str
     provenance: str
-    version: str|None= None
-    custodian: str|None = None
-    pid: str|None = None
+    version: str | None = None
+    custodian: str | None = None
+    pid: str | None = None
 
     @field_validator("creator")
     def publisher_must_be_from_list2(cls, v):
@@ -51,6 +50,7 @@ class ConceptScheme(BaseModel):
                 f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}"
             )
         return v
+
     @field_validator("publisher")
     def publisher_must_be_from_list(cls, v):
         if v not in ORGANISATIONS.keys():
@@ -136,8 +136,8 @@ class Concept(BaseModel):
     def_language_code: List[str] = []
     children: List[str] = []
     other_ids: List[str] = []
-    home_vocab_uri: str|None = None
-    provenance: str|None = None
+    home_vocab_uri: str | None = None
+    provenance: str | None = None
     related_match: List[str] = []
     close_match: List[str] = []
     exact_match: List[str] = []
@@ -299,7 +299,7 @@ class Collection(BaseModel):
     pref_label: str
     definition: str
     members: List[str]
-    provenance: str |None = None
+    provenance: str | None = None
 
     @field_validator("members")
     def members_must_by_iris(cls, v):

@@ -19,7 +19,10 @@ def test_empty_template():
     ):
         convert.excel_to_rdf(TEMPLATES_DIR_PATH / "VocExcel-template-040.xlsx")
 
-@pytest.mark.xfail(reason="Incompatible with Pydantic v2, 40008 and 44005 are nto parsable as dates")
+
+@pytest.mark.xfail(
+    reason="Incompatible with Pydantic v2, 40008 and 44005 are nto parsable as dates"
+)
 def test_simple():
     convert.excel_to_rdf(
         TESTS_DATA_DIR_PATH / "040_simple.xlsx",
@@ -50,9 +53,4 @@ def test_minimal_template_is_isomorphic():
     g2 = convert.excel_to_rdf(
         TESTS_DATA_DIR_PATH / "040_minimal.xlsx", output_format="graph"
     )
-    _, in_first, in_second = compare.graph_diff(g1,g2)
-    print("first")
-    print(in_first.serialize(format="turtle"))
-    print("second")
-    print(in_second.serialize(format="turtle"))
     assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"

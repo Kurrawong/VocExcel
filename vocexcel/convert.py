@@ -46,12 +46,12 @@ from vocexcel.convert_085 import rdf_to_excel as rdf_to_excel_085
 from vocexcel.utils import (
     EXCEL_FILE_ENDINGS,
     KNOWN_FILE_ENDINGS,
+    KNOWN_TEMPLATE_VERSIONS,
     RDF_FILE_ENDINGS,
     ConversionError,
     get_template_version,
     load_workbook,
-    KNOWN_TEMPLATE_VERSIONS,
-    return_error
+    return_error,
 )
 
 TEMPLATE_VERSION = None
@@ -62,7 +62,7 @@ def excel_to_rdf(
     output_file: Optional[Path] = None,
     allowed_template_versions=None,
     output_format: Literal["rdf", "graph"] = "rdf",
-    error_format: TypeLiteral["python", "cmd", "json"] = "python"
+    error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ):
     """Converts an Excel workbook file to RDF
 
@@ -84,22 +84,24 @@ def excel_to_rdf(
 
     if allowed_template_versions is not None:
         if not set(allowed_template_versions).issubset(KNOWN_TEMPLATE_VERSIONS):
-            error = ValueError(f"You have restricted the allowed template versions to unknown template versions. Known template versions are {', '.join(KNOWN_TEMPLATE_VERSIONS)}")
+            error = ValueError(
+                f"You have restricted the allowed template versions to unknown template versions. Known template versions are {', '.join(KNOWN_TEMPLATE_VERSIONS)}"
+            )
             return return_error(error, error_format)
         elif actual_template_version not in allowed_template_versions:
-            error = ValueError(f"You have restricted the allowed template versions to {', '.join(allowed_template_versions)} but supplied a template of version {actual_template_version}")
+            error = ValueError(
+                f"You have restricted the allowed template versions to {', '.join(allowed_template_versions)} but supplied a template of version {actual_template_version}"
+            )
             return return_error(error, error_format)
     elif actual_template_version not in KNOWN_TEMPLATE_VERSIONS:
-        error = ConversionError(f"Unknown template version: {actual_template_version}. Must be one of {', '.join(KNOWN_TEMPLATE_VERSIONS)}")
+        error = ConversionError(
+            f"Unknown template version: {actual_template_version}. Must be one of {', '.join(KNOWN_TEMPLATE_VERSIONS)}"
+        )
         return return_error(error, error_format)
 
     if actual_template_version in ["0.8.5", "0.8.5.GA"]:
         return excel_to_rdf_085(
-            wb,
-            output_file,
-            actual_template_version,
-            output_format,
-            error_format
+            wb, output_file, actual_template_version, output_format, error_format
         )
 
     elif actual_template_version in ["0.7.1"]:
@@ -165,9 +167,9 @@ def excel_to_rdf(
             raise ConversionError(f"ConceptScheme processing error: {e}")
 
     elif (
-            actual_template_version == "0.4.0"
-            or actual_template_version == "0.4.1"
-            or actual_template_version == "0.4.2"
+        actual_template_version == "0.4.0"
+        or actual_template_version == "0.4.1"
+        or actual_template_version == "0.4.2"
     ):
         try:
             sheet = wb["Concept Scheme"]
@@ -230,7 +232,9 @@ def main(args=None):
         args = sys.argv[1:]
 
     if args is None or args == []:
-        return return_error(ValueError("You must supply the path to a file to convert"), "cmd")
+        return return_error(
+            ValueError("You must supply the path to a file to convert"), "cmd"
+        )
 
     parser = argparse.ArgumentParser(
         prog="vocexcel", formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -288,9 +292,7 @@ def main(args=None):
         if args.input_file.suffix.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
             try:
                 o = excel_to_rdf(
-                    args.input_file,
-                    output_file=args.outputfile,
-                    output_format="rdf"
+                    args.input_file, output_file=args.outputfile, output_format="rdf"
                 )
                 if args.outputfile is None:
                     print(o)
@@ -306,6 +308,7 @@ def main(args=None):
             else:
                 print(f"Converted result at {args.outputfile}")
     return None
+
 
 if __name__ == "__main__":
     try:

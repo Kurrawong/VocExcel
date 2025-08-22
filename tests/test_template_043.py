@@ -18,7 +18,10 @@ def test_empty_template():
         convert.excel_to_rdf(TEMPLATES_DIR_PATH / "VocExcel-template-043.xlsx")
     assert "7 validation errors for ConceptScheme" in str(e)
 
-@pytest.mark.xfail(reason="Incompatible with Pydantic v2, 40008 and 44005 are nto parsable as dates")
+
+@pytest.mark.xfail(
+    reason="Incompatible with Pydantic v2, 40008 and 44005 are nto parsable as dates"
+)
 def test_simple():
     g = convert.excel_to_rdf(
         TESTS_DATA_DIR_PATH / "043_simple_valid.xlsx",
