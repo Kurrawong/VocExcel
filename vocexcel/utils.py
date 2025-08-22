@@ -16,6 +16,8 @@ from pyshacl.pytypes import GraphLike
 from rdflib import BNode, Graph, Literal, Namespace, Node, URIRef
 from rdflib.namespace import DCTERMS, PROV, RDF, SDO, SH, SKOS, XSD
 
+from vocexcel import profiles
+
 EXCEL_FILE_ENDINGS = ["xlsx"]
 RDF_FILE_ENDINGS = {
     ".ttl": "ttl",
@@ -110,6 +112,7 @@ def get_template_version(wb: Workbook, error_format: TypeLiteral["python", "cmd"
             pi = wb["program info"]
             if pi["B2"].value is not None:
                 return pi["B2"].value
+            return None
         except Exception:
             return None
 
@@ -405,7 +408,7 @@ def fill_cell_with_list_of_curies(
     ws[cell_id].font = Font(size=14)
 
 
-def return_error(error, error_output_format: TypeLiteral["python", "cmd", "json"] = "python") -> str:
+def return_error(error, error_output_format: TypeLiteral["python", "cmd", "json"] = "python") -> str | None:
     if error_output_format == "python":
         raise error
 
@@ -424,10 +427,12 @@ def return_error(error, error_output_format: TypeLiteral["python", "cmd", "json"
     elif error_output_format == "cmd":
         print(f"ERROR: {error_message}")
         print(error_body)
-        return
+    return None
 
 
-def format_shacl_error(error_graph: Graph, output_format: TypeLiteral["python", "cmd", "json"] = "python") -> Graph|str|list:
+
+
+def format_shacl_error(error_graph: Graph, output_format: TypeLiteral["python", "cmd", "json"] = "python") -> Graph | str | list:
     if output_format == "python":
         return error_graph
     else:

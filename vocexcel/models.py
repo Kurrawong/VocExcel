@@ -2,8 +2,9 @@ import datetime
 from itertools import chain
 from typing import List, Union
 
+import dateutil.parser
 from openpyxl import Workbook
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import DCAT, DCTERMS, OWL, RDF, RDFS, SKOS, XSD
 
@@ -35,16 +36,22 @@ class ConceptScheme(BaseModel):
     title: str
     description: str
     created: datetime.date
-    modified: datetime.date = None
+    modified: datetime.date|None = None
     creator: str
     publisher: str
     provenance: str
-    version: str = None
-    custodian: str = None
-    pid: str = None
+    version: str|None= None
+    custodian: str|None = None
+    pid: str|None = None
 
-    @validator("creator", allow_reuse=True)
-    @validator("publisher", allow_reuse=True)
+    @field_validator("creator")
+    def publisher_must_be_from_list2(cls, v):
+        if v not in ORGANISATIONS.keys():
+            raise ValueError(
+                f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}"
+            )
+        return v
+    @field_validator("publisher")
     def publisher_must_be_from_list(cls, v):
         if v not in ORGANISATIONS.keys():
             raise ValueError(
@@ -80,7 +87,7 @@ class ConceptScheme(BaseModel):
             )
         g.add((v, DCTERMS.creator, ORGANISATIONS[self.creator]))
         g.add((v, DCTERMS.publisher, ORGANISATIONS[self.publisher]))
-        if self.version is not None:
+        if self.version is not None and self.version != "None":
             g.add((v, OWL.versionInfo, Literal(self.version)))
         g.add((v, DCTERMS.provenance, Literal(self.provenance, lang="en")))
         if self.custodian is not None:
@@ -129,45 +136,45 @@ class Concept(BaseModel):
     def_language_code: List[str] = []
     children: List[str] = []
     other_ids: List[str] = []
-    home_vocab_uri: str = None
-    provenance: str = None
+    home_vocab_uri: str|None = None
+    provenance: str|None = None
     related_match: List[str] = []
     close_match: List[str] = []
     exact_match: List[str] = []
     narrow_match: List[str] = []
     broad_match: List[str] = []
 
-    @validator("children")
+    @field_validator("children")
     def each_c_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]
         return elem
 
-    @validator("related_match")
+    @field_validator("related_match")
     def each_rm_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]
         return elem
 
-    @validator("close_match")
+    @field_validator("close_match")
     def each_cm_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]
         return elem
 
-    @validator("exact_match")
+    @field_validator("exact_match")
     def each_em_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]
         return elem
 
-    @validator("narrow_match")
+    @field_validator("narrow_match")
     def each_nm_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]
         return elem
 
-    @validator("broad_match")
+    @field_validator("broad_match")
     def each_bm_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]
@@ -292,9 +299,9 @@ class Collection(BaseModel):
     pref_label: str
     definition: str
     members: List[str]
-    provenance: str = None
+    provenance: str |None = None
 
-    @validator("members")
+    @field_validator("members")
     def members_must_by_iris(cls, v):
         if any([not i.startswith("http") for i in v]):
             raise ValueError("The members of a Collection must be a list of IRIs")

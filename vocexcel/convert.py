@@ -189,7 +189,7 @@ def excel_to_rdf(
     ).to_graph()
 
     if output_file is not None:
-        vocab_graph.serialize(destination=str(output_file), format="longturtle")
+        return vocab_graph.serialize(destination=str(output_file), format="longturtle")
     else:  # print to std out
         if output_format == "graph":
             return vocab_graph
@@ -305,7 +305,7 @@ def main(args=None):
                 print(f"Converted result at {args.input_file.with_suffix('.xlsx')}")
             else:
                 print(f"Converted result at {args.outputfile}")
-
+    return None
 
 if __name__ == "__main__":
     try:
