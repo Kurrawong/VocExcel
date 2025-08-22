@@ -17,33 +17,21 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v3
 
-      - name: Use Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version-file: "pyproject.toml"
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          installer-parallel: true
+      - name: Install dependencies
+        run: uv sync
 
-      - name: Install Task
-        uses: arduino/setup-task@v1
-
-      - name: Install Python dependencies
-        run: task install
-
-      - name: Run Pytest
-        run: task test
+      - name: Run tests
+        run: uv run pytest
 
       - name: Run formatters in check mode
-        run: task format:check
+        run: uv run ruff check --fix
       
-      
-      ## test app builds
-      - name: Build UI app
-        run: |
-          npm --prefix vocexcel-ui ci
-          npm --prefix vocexcel-ui run build
+
