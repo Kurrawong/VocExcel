@@ -1,6 +1,7 @@
 import logging
 from typing import List, Tuple
 
+from dateutil import parser
 from openpyxl.worksheet.worksheet import Worksheet
 from pydantic import ValidationError
 
@@ -249,7 +250,7 @@ def extract_concept_scheme(sheet: Worksheet, prefix):
         modified=sheet["B6"].value,
         creator=sheet["B7"].value,
         publisher=sheet["B8"].value,
-        version=sheet["B9"].value,
+        version=str(sheet["B9"].value),
         provenance=sheet["B10"].value,
         custodian=sheet["B11"].value,
         pid=sheet["B12"].value,

@@ -1,3 +1,4 @@
+import datetime
 from typing import List, Tuple
 
 from openpyxl.worksheet.worksheet import Worksheet
@@ -84,7 +85,7 @@ def extract_concept_scheme(sheet: Worksheet):
         modified=sheet["B6"].value,
         creator=sheet["B7"].value,
         publisher=sheet["B8"].value,
-        version=sheet["B9"].value,
+        version=str(sheet["B9"].value),
         provenance=sheet["B10"].value,
         custodian=sheet["B11"].value,
         pid=sheet["B12"].value,

@@ -82,7 +82,7 @@ def extract_concept_scheme(sheet: Worksheet):
         modified=sheet["B5"].value,
         creator=sheet["B6"].value,
         publisher=sheet["B7"].value,
-        version=sheet["B8"].value,
+        version=str(sheet["B8"].value),
         provenance=sheet["B9"].value,
         custodian=sheet["B10"].value,
         pid=sheet["B11"].value,

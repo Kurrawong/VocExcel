@@ -92,7 +92,9 @@ def test_085_errors(capsys):
     assert ERROR_TXT in p["message"]
 
     XL_FILE = TESTS_DATA_DIR_PATH / "085_invalid.xlsx"
-    ERROR_TXT = "Your vocabulary has no creator. Please add it to the Concept Scheme sheet"
+    ERROR_TXT = (
+        "Your vocabulary has no creator. Please add it to the Concept Scheme sheet"
+    )
 
     with pytest.raises(ConversionError):
         g = convert.excel_to_rdf(XL_FILE)  # error_format = "python"

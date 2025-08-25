@@ -375,9 +375,7 @@ def extract_additions_concept_properties(sheet: Worksheet, prefixes) -> Graph:
 def excel_to_rdf(
     wb: Workbook,
     output_file_path: Optional[Path] = None,
-    output_format: TypeLiteral[
-        "rdf", "graph"
-    ] = "rdf",
+    output_format: TypeLiteral["rdf", "graph"] = "rdf",
     validate: bool = False,
     profile="vocpub-46",
     error_level=1,
