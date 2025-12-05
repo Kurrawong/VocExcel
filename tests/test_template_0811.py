@@ -1,12 +1,8 @@
-import json
 import sys
 from pathlib import Path
 
-import pytest
-from rdflib import Literal, URIRef
-from rdflib.namespace import SDO, XSD, RDF, SKOS
-
-from vocexcel.utils import ConversionError
+from rdflib import URIRef
+from rdflib.namespace import SDO, RDF, SKOS
 
 sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from vocexcel import convert
@@ -16,9 +12,7 @@ TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 
 def test_085():
-    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "0810.xlsx", output_format="graph")
-
-    print(g.serialize(format="longturtle"))
+    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "0811.xlsx", output_format="graph")
 
     assert (
         URIRef("http://example.com/voc/rock-types"),
@@ -39,7 +33,9 @@ def test_085():
     ) in g
 
     assert (
-        URIRef("https://linked.data.gov.au/def/gswa-rock-classification-scheme/sedimentary"),
+        URIRef(
+            "https://linked.data.gov.au/def/gswa-rock-classification-scheme/sedimentary"
+        ),
         RDF.type,
         SKOS.Concept,
     ) in g
@@ -50,17 +46,12 @@ def test_085():
         SKOS.Concept,
     ) in g
 
-    # assert (
-    #     URIRef("http://example.com/voc/myvoc/cat"),
-    #     SDO.image,
-    #     Literal("Image at L4"),
-    # ) in g
-    #
-    # assert (
-    #     URIRef("http://example.com/voc/myvoc/dog"),
-    #     SDO.image,
-    #     Literal(
-    #         "https://en.wikipedia.org/wiki/Dog#/media/File:Huskiesatrest.jpg",
-    #         datatype=XSD.anyURI,
-    #     ),
-    # ) in g
+    print(g.serialize(format="longturtle"))
+
+
+def test_085_ntgs():
+    g = convert.excel_to_rdf(
+        TESTS_DATA_DIR_PATH / "0811_ntgs.xlsx", output_format="graph"
+    )
+
+    print(g.serialize(format="longturtle"))

@@ -256,7 +256,9 @@ def make_agent(agent_value, agent_role, prefixes, iri_of_subject) -> Graph:
 def make_iri(s: str, prefixes: dict[str, Namespace], namespace=None):
     iri = make_clean_str(s)
     iri = expand_namespaces(iri, prefixes)
-    iri = namespace + iri if not iri.startswith("http") and namespace is not None else iri
+    iri = (
+        namespace + iri if not iri.startswith("http") and namespace is not None else iri
+    )
     is_an_iri = string_is_http_iri(str(iri))
     if not is_an_iri[0]:
         raise ConversionError(is_an_iri[1])

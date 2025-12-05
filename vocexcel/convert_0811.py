@@ -4,15 +4,13 @@ from typing import Optional
 
 from openpyxl.workbook.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
+from pyshacl import validate as shacl_validate
 from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import RDF, RDFS, SDO, SKOS, XSD
-from pyshacl import validate as shacl_validate
+
 from vocexcel.convert_085 import (
     extract_prefixes as extract_prefixes_085,
     extract_concept_scheme as extract_concept_scheme_085,
-    extract_collections as extract_collections_085,
-    extract_additions_concept_properties as extract_additions_concept_properties_085,
-    excel_to_rdf as excel_to_rdf_085,
     rdf_to_excel as rdf_to_excel_085,
 )
 from vocexcel.utils import (
@@ -23,8 +21,9 @@ from vocexcel.utils import (
     return_error,
     split_and_tidy_to_iris,
     split_and_tidy_to_strings,
-add_top_concepts,
-RDF_FILE_ENDINGS,ShaclValidationError
+    add_top_concepts,
+    RDF_FILE_ENDINGS,
+    ShaclValidationError,
 )
 
 DATAROLES = Namespace("https://linked.data.gov.au/def/data-roles/")
@@ -178,15 +177,126 @@ def extract_collections(
     cs_iri,
     error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ):
-    return extract_collections_085(sheet, prefixes, cs_iri, error_format)
+    g = Graph(bind_namespaces="rdflib")
+    i = 4
+    while True:
+        # get values
+        iri_s = sheet[f"A{i}"].value
+        pref_label = sheet[f"B{i}"].value
+        definition = sheet[f"C{i}"].value
+        members = sheet[f"D{i}"].value
+        history_note = sheet[f"E{i}"].value
+
+        # check values
+        if iri_s is None:
+            break
+
+        iri = make_iri(iri_s, prefixes, namespace=cs_iri + "/")
+
+        if pref_label is None:
+            raise ConversionError(
+                f"You must provide a Preferred Label for Collection {iri_s}"
+            )
+
+        if definition is None:
+            raise ConversionError(
+                f"You must provide a Definition for Collection {iri_s}"
+            )
+
+        # create Graph
+        g.add((iri, RDF.type, SKOS.Collection))
+        g.add((iri, SKOS.inScheme, cs_iri))
+        g.add((iri, RDFS.isDefinedBy, cs_iri))
+        if str(iri).startswith(str(cs_iri)):
+            g.add((iri, RDFS.isDefinedBy, cs_iri))
+        g.add((iri, SKOS.prefLabel, Literal(pref_label, lang="en")))
+        g.add((iri, SKOS.definition, Literal(definition, lang="en")))
+
+        if members is not None:
+            for n in split_and_tidy_to_iris(members, prefixes):
+                g.add((iri, SKOS.member, n))
+
+        if history_note is not None:
+            g.add((iri, SKOS.historyNote, Literal(history_note.strip())))
+
+        i += 1
+
+    bind_namespaces(g, prefixes)
+    return g
 
 
 def extract_additions_concept_properties(
     sheet: Worksheet,
     prefixes,
+    cs_iri,
     error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ):
-    return extract_additions_concept_properties_085(sheet, prefixes, error_format)
+    g = Graph(bind_namespaces="rdflib")
+    i = 4
+    while True:
+        # get values
+        iri_s = sheet[f"A{i}"].value
+        related_s = sheet[f"B{i}"].value
+        close_s = sheet[f"C{i}"].value
+        exact_s = sheet[f"D{i}"].value
+        narrow_s = sheet[f"E{i}"].value
+        broad_s = sheet[f"F{i}"].value
+        notation_s = sheet[f"G{i}"].value
+        notation_type_s = sheet[f"H{i}"].value
+
+        # check values
+        if iri_s is None:
+            break
+
+        i += 1
+
+        # ignore example Concepts
+        if iri_s in [
+            "http://example.com/geology",
+        ]:
+            continue
+
+        # create Graph
+        iri = make_iri(iri_s, prefixes, namespace=cs_iri + "/")
+
+        if related_s is not None:
+            related = make_iri(related_s, prefixes, namespace=cs_iri + "/")
+            g.add((iri, SKOS.relatedMatch, related))
+
+        if close_s is not None:
+            close = make_iri(close_s, prefixes, namespace=cs_iri + "/")
+            g.add((iri, SKOS.closeMatch, close))
+
+        if exact_s is not None:
+            exact = make_iri(exact_s, prefixes, namespace=cs_iri + "/")
+            g.add((iri, SKOS.exactMatch, exact))
+
+        if narrow_s is not None:
+            narrow = make_iri(narrow_s, prefixes, namespace=cs_iri + "/")
+            g.add((iri, SKOS.narrowMatch, narrow))
+
+        if broad_s is not None:
+            broad = make_iri(broad_s, prefixes, namespace=cs_iri + "/")
+            g.add((iri, SKOS.broadMatch, broad))
+
+        if notation_s is not None:
+            notations = split_and_tidy_to_strings(notation_s)
+            if notation_type_s is not None:
+                notation_types = split_and_tidy_to_iris(notation_type_s, prefixes)
+            else:
+                notation_types = [XSD.token for x in notations]
+
+            for j, notation in enumerate(notations):
+                g.add(
+                    (
+                        iri,
+                        SKOS.notation,
+                        Literal(notation, datatype=notation_types[j]),
+                    )
+                )
+
+    bind_namespaces(g, prefixes)
+    return g
 
 
 def excel_to_rdf(
@@ -267,7 +377,7 @@ def excel_to_rdf(
         return cols
 
     extra = extract_additions_concept_properties(
-        wb["Additional Concept Properties"], prefixes
+        wb["Additional Concept Properties"], prefixes, cs_iri
     )
     if not isinstance(extra, Graph):
         return extra
@@ -310,4 +420,6 @@ def rdf_to_excel(
     Returns:
         output_format or an error in one of the error_formats
     """
-    return rdf_to_excel_085(rdf_file, output_file, template_version, output_format, error_format)
+    return rdf_to_excel_085(
+        rdf_file, output_file, template_version, output_format, error_format
+    )
