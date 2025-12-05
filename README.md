@@ -25,7 +25,7 @@ Use one Excel workbook per vocabulary.
 
 ### Latest Template
 
-* ***vocexcel/templates/VocExcel-template-085.xlsx***
+* ***vocexcel/templates/VocExcel-template-0810.xlsx***
 
 Unless you have a good reason to do something different, please use the latest version of the template.
 
@@ -33,9 +33,9 @@ Older templates still convert, so if you’ve used one and like it, keep using i
 
 ### Examples
 
-Example filled-in templates versions are given in the `tests/data/` folder. Just ensure you’re looking at examples prefixed with the same template version you are after, e.g. 0.8.5 = 085.xlsx.
+Example filled-in templates versions are given in the `tests/data/` folder. Just ensure you’re looking at examples prefixed with the same template version you are after, e.g. 0.8.10 = 0810.xlsx.
 
-As per _semantic versioning_, a template of 0.8.2 will work with 0.8.5. 
+As per _semantic versioning_, a template of 0.8.5 will work with 0.8.10.
 
 ## Processing
 
@@ -130,7 +130,7 @@ This code is licensed using the BSD 3-Clause. See the _LICENSE_ for the deed. No
 ## Contact
 
 ***Commercial support***:\
-https://docs.kurrawong.ai/products/tools/vocexcel/ \
+https://docs.kurrawong.ai/products/tools/vocexcel/\
 info@kurrawong.ai
 
 **Lead Developer**:\
@@ -138,3 +138,12 @@ info@kurrawong.ai
 **Data Architect**\
 [KurrawongAI](https://kurrawong.ai)\
 nick@kurrawong.ai
+
+## Release Procedure
+
+* update version numbers
+  * pyprojects.toml
+  * vocexcel/__init__.py
+* update ref to latest template, if changed, in README.adoc
+* reproduce README.md
+**

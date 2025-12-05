@@ -45,6 +45,7 @@ KNOWN_TEMPLATE_VERSIONS = [
     "0.7.1",
     "0.8.5",
     "0.8.5.GA",
+    "0.8.10",
 ]
 LATEST_TEMPLATE = KNOWN_TEMPLATE_VERSIONS[-1]
 
@@ -252,12 +253,13 @@ def make_agent(agent_value, agent_role, prefixes, iri_of_subject) -> Graph:
     return ag
 
 
-def make_iri(s: str, prefixes: dict[str, Namespace]):
-    s = make_clean_iri(s)
-    iri = expand_namespaces(s, prefixes)
-    iri_conv = string_is_http_iri(str(iri))
-    if not iri_conv[0]:
-        raise ConversionError(iri_conv[1])
+def make_iri(s: str, prefixes: dict[str, Namespace], namespace=None):
+    iri = make_clean_str(s)
+    iri = expand_namespaces(iri, prefixes)
+    iri = namespace + iri if not iri.startswith("http") and namespace is not None else iri
+    is_an_iri = string_is_http_iri(str(iri))
+    if not is_an_iri[0]:
+        raise ConversionError(is_an_iri[1])
     return iri
 
 
@@ -391,7 +393,7 @@ def log_msg(result: Dict, log_file: str) -> str:
     return formatted_msg
 
 
-def make_clean_iri(s: str):
+def make_clean_str(s: str):
     chars = "*{}[]()>+!$ %&"
     for c in chars:
         s = s.replace(c, "")
