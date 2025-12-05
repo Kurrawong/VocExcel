@@ -1,6 +1,6 @@
 [project]
 name = "vocexcel"
-version = "0.8.7"
+version = "0.8.8"
 description = """Another Excel to RDF converter for SKOS vocabs, \
   but one that include profile-based validation of results."""
 authors = [
@@ -82,12 +82,3 @@ dev = [
     "httpx<1.0.0,>=0.24.1",
     "ruff<1.0.0,>=0.0.277",
 ]
-
-[tool.hatch.build.targets.sdist]
-include = ["src", "README.md"]
-
-[tool.hatch.build.targets.wheel]
-include = ["src", "README.md"]
-
-[tool.hatch.build.hooks.downdoc]
-README.adoc = "README.md"
