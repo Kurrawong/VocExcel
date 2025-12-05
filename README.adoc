@@ -50,12 +50,11 @@ The Python script can also run as a Python module, i.e. within a larger Python w
 
 === Installation
 
-You will need to:
+VocExcel uses https://github.com/astral-sh/uv[uv] package manager.
 
-1. have Python installed on your computer
-* 3.10+ required
-2. install the required packages in your main Python environment or a virtual environment
-    * you can use the https://docs.astral.sh/uv/[uv] tool Python build tool with the _pyproject.toml_ file to install required Python packages
+You can install VocExcel from PyPI, the Python package index: https://pypi.org/project/vocexcel
+
+Or you can clone this repository and install VocExcel's dependencies using `uv` or a similar tool, using the provided _pyproject.toml_ file.
 
 === Running
 
