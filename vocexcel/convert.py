@@ -42,7 +42,7 @@ from vocexcel.convert_060 import excel_to_rdf as excel_to_rdf_060
 from vocexcel.convert_063 import excel_to_rdf as excel_to_rdf_063
 from vocexcel.convert_070 import excel_to_rdf as excel_to_rdf_070
 from vocexcel.convert_085 import excel_to_rdf as excel_to_rdf_085
-from vocexcel.convert_0811 import excel_to_rdf as excel_to_rdf_0811
+from vocexcel.convert_0812 import excel_to_rdf as excel_to_rdf_0812
 from vocexcel.convert_085 import rdf_to_excel as rdf_to_excel_085
 from vocexcel.utils import (
     EXCEL_FILE_ENDINGS,
@@ -100,8 +100,8 @@ def excel_to_rdf(
         )
         return return_error(error, error_format)
 
-    if actual_template_version in ["0.8.10"]:
-        return excel_to_rdf_0811(
+    if actual_template_version in ["0.8.12"]:
+        return excel_to_rdf_0812(
             wb, output_file, actual_template_version, output_format, error_format
         )
 

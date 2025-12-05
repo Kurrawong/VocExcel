@@ -25,7 +25,7 @@ Use one Excel workbook per vocabulary.
 
 ### Latest Template
 
-* ***vocexcel/templates/VocExcel-template-0811.xlsx***
+* ***vocexcel/templates/VocExcel-template-0812.xlsx***
 
 Unless you have a good reason to do something different, please use the latest version of the template.
 
@@ -33,7 +33,7 @@ Older templates still convert, so if you’ve used one and like it, keep using i
 
 ### Examples
 
-Example filled-in templates versions are given in the `tests/data/` folder. Just ensure you’re looking at examples prefixed with the same template version you are after, e.g. 0.8.10 = 0811.xlsx.
+Example filled-in templates versions are given in the `tests/data/` folder. Just ensure you’re looking at examples prefixed with the same template version you are after, e.g. 0.8.10 = 0812.xlsx.
 
 As per _semantic versioning_, a template of 0.8.5 will work with 0.8.10.
 
@@ -74,7 +74,7 @@ vocexel some-excel-file.xlsx
 An example, using one of the test data files to convert from Excel to RDF:
 
 ```
-python convert.py tests/data/0811.xlsx
+python convert.py tests/data/0812.xlsx
 ```
 
 To convert the other way - RDF to Excel - from with you’ll get a v0.8.x template result:

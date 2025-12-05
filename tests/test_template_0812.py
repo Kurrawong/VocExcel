@@ -11,8 +11,8 @@ TEMPLATES_DIR_PATH = Path(__file__).parent.parent.absolute() / "vocexcel/templat
 TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 
-def test_085():
-    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "0811.xlsx", output_format="graph")
+def test_0812():
+    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "0812.xlsx", output_format="graph")
 
     assert (
         URIRef("http://example.com/voc/rock-types"),
@@ -49,9 +49,33 @@ def test_085():
     print(g.serialize(format="longturtle"))
 
 
-def test_085_ntgs():
+def test_0812_ntgs():
     g = convert.excel_to_rdf(
-        TESTS_DATA_DIR_PATH / "0811_ntgs.xlsx", output_format="graph"
+        TESTS_DATA_DIR_PATH / "0812_ntgs.xlsx", output_format="graph"
     )
 
-    print(g.serialize(format="longturtle"))
+    assert (
+        URIRef("https://linked.data.gov.au/def/cox-classification/carbonatite"),
+        SKOS.topConceptOf,
+        URIRef("https://linked.data.gov.au/def/cox-classification"),
+    ) in g
+
+    assert (
+        URIRef("https://linked.data.gov.au/def/cox-classification/carbonatite"),
+        SKOS.narrower,
+        URIRef("https://linked.data.gov.au/def/cox-classification/carbonate-hosted-zn"),
+    ) in g
+
+    assert (
+        URIRef("https://linked.data.gov.au/def/cox-classification/carbonate-hosted-zn"),
+        SKOS.broader,
+        URIRef("https://linked.data.gov.au/def/cox-classification/carbonatite"),
+    ) in g
+
+    assert (
+        URIRef("https://linked.data.gov.au/def/cox-classification/carbonate-hosted-zn"),
+        SKOS.inScheme,
+        URIRef("https://linked.data.gov.au/def/cox-classification"),
+    ) in g
+
+    # print(g.serialize(format="longturtle"))

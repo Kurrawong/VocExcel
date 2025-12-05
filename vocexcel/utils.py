@@ -45,7 +45,7 @@ KNOWN_TEMPLATE_VERSIONS = [
     "0.7.1",
     "0.8.5",
     "0.8.5.GA",
-    "0.8.10",
+    "0.8.12",
 ]
 LATEST_TEMPLATE = KNOWN_TEMPLATE_VERSIONS[-1]
 
@@ -149,9 +149,9 @@ def split_and_tidy_to_strings(s: str):
         return [x.strip() for x in re.split(r"[,\n]\s?", s.strip()) if x != ""]
 
 
-def split_and_tidy_to_iris(s: str, prefixes):
+def split_and_tidy_to_iris(s: str, prefixes, cs_iri=None):
     return [
-        expand_namespaces(ss.strip(), prefixes) for ss in split_and_tidy_to_strings(s)
+        make_iri(ss, prefixes, cs_iri) for ss in split_and_tidy_to_strings(s)
     ]
 
 

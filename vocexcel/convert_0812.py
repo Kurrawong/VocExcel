@@ -133,7 +133,7 @@ def extract_concepts(
                 g.add((iri, SKOS.altLabel, Literal(al, lang="en")))
 
         if narrower is not None:
-            for n in split_and_tidy_to_iris(narrower, prefixes):
+            for n in split_and_tidy_to_iris(narrower, prefixes, cs_iri + "/"):
                 g.add((iri, SKOS.narrower, n))
                 g.add((n, SKOS.broader, iri))
 
@@ -213,7 +213,7 @@ def extract_collections(
         g.add((iri, SKOS.definition, Literal(definition, lang="en")))
 
         if members is not None:
-            for n in split_and_tidy_to_iris(members, prefixes):
+            for n in split_and_tidy_to_iris(members, prefixes, cs_iri):
                 g.add((iri, SKOS.member, n))
 
         if history_note is not None:
@@ -282,7 +282,7 @@ def extract_additions_concept_properties(
         if notation_s is not None:
             notations = split_and_tidy_to_strings(notation_s)
             if notation_type_s is not None:
-                notation_types = split_and_tidy_to_iris(notation_type_s, prefixes)
+                notation_types = split_and_tidy_to_iris(notation_type_s, prefixes, cs_iri)
             else:
                 notation_types = [XSD.token for x in notations]
 
@@ -336,7 +336,7 @@ def excel_to_rdf(
             )
             return return_error(error, error_format)
 
-    if template_version not in ["0.8.10"]:
+    if template_version not in ["0.8.12"]:
         error = ValueError(
             f"This converter can only handle templates with versions 0.8.x or 0.8.x.GA, not {template_version}"
         )
