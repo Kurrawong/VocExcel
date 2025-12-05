@@ -10,7 +10,7 @@ requires-python = "<4.0.0,>=3.12"
 dependencies = [
     "openpyxl<4.0.0,>=3.0.9",
     "rdflib<8.0.0,>=7.0.0",
-    "pydantic<2.0.0,>=1.9.0",
+    "pydantic>2.11",
     "pyshacl<1.0.0,>=0.18.1",
     "dateutils<1.0.0,>=0.6.12",
     "colorama<1.0.0,>=0.4.4",
@@ -20,7 +20,6 @@ dependencies = [
     "jinja2<4.0.0,>=3.1.2",
     "mangum<1.0.0,>=0.17.0",
     "black<26.0.0,>=25.1.0",
-    "fastapi>=0.115.12",
     "python-multipart>=0.0.20",
     "hatch>=1.16.1",
 ]

@@ -22,20 +22,23 @@ from vocexcel.utils import (
     ShaclValidationError,
     add_top_concepts,
     bind_namespaces,
+    fill_cell_with_list_of_curies,
     load_workbook,
     make_agent,
     make_iri,
+    return_error,
     split_and_tidy_to_iris,
     split_and_tidy_to_strings,
     xl_hyperlink,
-    fill_cell_with_list_of_curies,
-    return_error
 )
 
 DATAROLES = Namespace("https://linked.data.gov.au/def/data-roles/")
 
 
-def extract_prefixes(sheet: Worksheet, error_format: TypeLiteral["python", "cmd", "json"] = "python",) -> dict[str, Namespace]|str|None:
+def extract_prefixes(
+    sheet: Worksheet,
+    error_format: TypeLiteral["python", "cmd", "json"] = "python",
+) -> dict[str, Namespace] | str | None:
     prefixes = {}
     i = 3
     while True:
@@ -59,7 +62,10 @@ def extract_prefixes(sheet: Worksheet, error_format: TypeLiteral["python", "cmd"
 
 
 def extract_concept_scheme(
-    sheet: Worksheet, prefixes, template_version="0.8.5", error_format: TypeLiteral["python", "cmd", "json"] = "python",
+    sheet: Worksheet,
+    prefixes,
+    template_version="0.8.5",
+    error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ) -> tuple[Graph, str]:
     iri_s = sheet["B3"].value
     title = sheet["B4"].value
@@ -219,7 +225,12 @@ def extract_concept_scheme(
     return g, iri
 
 
-def extract_concepts(sheet: Worksheet, prefixes, cs_iri, error_format: TypeLiteral["python", "cmd", "json"] = "python"):
+def extract_concepts(
+    sheet: Worksheet,
+    prefixes,
+    cs_iri,
+    error_format: TypeLiteral["python", "cmd", "json"] = "python",
+):
     g = Graph(bind_namespaces="rdflib")
     i = 4
     while True:
@@ -250,7 +261,9 @@ def extract_concepts(sheet: Worksheet, prefixes, cs_iri, error_format: TypeLiter
             return return_error(error, error_format)
 
         if definition is None:
-            error = ConversionError(f"You must provide a Definition for Concept {iri_s}")
+            error = ConversionError(
+                f"You must provide a Definition for Concept {iri_s}"
+            )
             return return_error(error, error_format)
 
         if status is not None and status not in STATUSES:
@@ -338,19 +351,31 @@ def extract_concepts(sheet: Worksheet, prefixes, cs_iri, error_format: TypeLiter
     return g
 
 
-def extract_collections(sheet: Worksheet, prefixes, cs_iri, error_format: TypeLiteral["python", "cmd", "json"] = "python"):
+def extract_collections(
+    sheet: Worksheet,
+    prefixes,
+    cs_iri,
+    error_format: TypeLiteral["python", "cmd", "json"] = "python",
+):
     return extract_collections_070(sheet, prefixes, cs_iri)
 
 
-def extract_additions_concept_properties(sheet: Worksheet, prefixes, error_format: TypeLiteral["python", "cmd", "json"] = "python"):
+def extract_additions_concept_properties(
+    sheet: Worksheet,
+    prefixes,
+    error_format: TypeLiteral["python", "cmd", "json"] = "python",
+):
     return extract_additions_concept_properties_070(sheet, prefixes)
 
 
 def excel_to_rdf(
     wb: Workbook,
     output_file: Optional[Path] = None,
-    template_version: str ="0.8.5",
-    output_format: TypeLiteral["graph", "rdf", ] = "rdf",
+    template_version: str = "0.8.5",
+    output_format: TypeLiteral[
+        "graph",
+        "rdf",
+    ] = "rdf",
     error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ):
     """Converts an Excel workbook file to RDF
@@ -476,9 +501,7 @@ def rdf_to_excel(
 
     if output_file is not None:
         if not Path(output_file).suffix == ".xlsx":
-            error = ValueError(
-                "If specifying an output_file, it must end with .xlsx"
-            )
+            error = ValueError("If specifying an output_file, it must end with .xlsx")
             return return_error(error, error_format)
 
     if template_version not in ["0.8.5", "0.8.5.GA"]:
@@ -518,7 +541,7 @@ def rdf_to_excel(
 
     # load the template
     fn = (
-        "VocExcel-template-080-GA.xlsx"
+        "VocExcel-template-085-GA.xlsx"
         if template_version == "0.8.5.GA"
         else "VocExcel-template-085.xlsx"
     )

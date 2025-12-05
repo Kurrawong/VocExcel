@@ -4,10 +4,10 @@
 Another Excel-to-RDF converter for SKOS vocabs, but one that:
 
 * uses fixed templates to keep it simple
-* meets particular SKOS profile outcomes (https://w3id.org/profile/vocpub[VocPub])
+* meets particular SKOS profile outcomes (https://linked.data.gov.au/def/vocpub[VocPub])
 * is under active development, production use, and is commercially supported
 
-An online version of VocExcel is available at https://tools.dev.kurrawong.ai/vocexcel.
+An online version of VocExcel is available at https://tools.kurrawong.ai/tools/vocexcel.
 
 == Creating vocabularies
 
@@ -122,7 +122,7 @@ excel_to_rdf(Path(".") / "path" / "to" / "vocab-file.ttl")
 
 ==== Online
 
-https://kurrawong.ai[KurrawongAI] maintains an online VocExcel tool at https://tools.dev.kurrawong.ai/tools/vocexcel
+https://kurrawong.ai[KurrawongAI] maintains an online VocExcel tool at https://tools.kurrawong.ai/tools/vocexcel
 
 == License
 

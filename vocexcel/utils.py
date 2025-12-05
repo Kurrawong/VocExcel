@@ -16,6 +16,8 @@ from pyshacl.pytypes import GraphLike
 from rdflib import BNode, Graph, Literal, Namespace, Node, URIRef
 from rdflib.namespace import DCTERMS, PROV, RDF, SDO, SH, SKOS, XSD
 
+from vocexcel import profiles
+
 EXCEL_FILE_ENDINGS = ["xlsx"]
 RDF_FILE_ENDINGS = {
     ".ttl": "ttl",
@@ -83,19 +85,26 @@ class ShaclValidationError(ConversionError):
         self.graph = graph
 
 
-def load_workbook(file_path: Path|Workbook, error_format: TypeLiteral["python", "cmd", "json"] = "python") -> Workbook|str|None:
+def load_workbook(
+    file_path: Path | Workbook,
+    error_format: TypeLiteral["python", "cmd", "json"] = "python",
+) -> Workbook | str | None:
     if isinstance(file_path, Workbook):
         return file_path
 
     if not isinstance(
         file_path, SpooledTemporaryFile
     ) and not file_path.name.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
-        error = ValueError("Files for conversion to RDF must be Excel files ending .xlsx")
+        error = ValueError(
+            "Files for conversion to RDF must be Excel files ending .xlsx"
+        )
         return return_error(error, error_format)
     return _load_workbook(filename=file_path, data_only=True)
 
 
-def get_template_version(wb: Workbook, error_format: TypeLiteral["python", "cmd", "json"] = "python") -> str:
+def get_template_version(
+    wb: Workbook, error_format: TypeLiteral["python", "cmd", "json"] = "python"
+) -> str:
     # try 0.4.0, 0.5.0 & 0.6.x locations
     def find_version(wb: Workbook):
         try:
@@ -110,6 +119,7 @@ def get_template_version(wb: Workbook, error_format: TypeLiteral["python", "cmd"
             pi = wb["program info"]
             if pi["B2"].value is not None:
                 return pi["B2"].value
+            return None
         except Exception:
             return None
 
@@ -405,7 +415,9 @@ def fill_cell_with_list_of_curies(
     ws[cell_id].font = Font(size=14)
 
 
-def return_error(error, error_output_format: TypeLiteral["python", "cmd", "json"] = "python") -> str:
+def return_error(
+    error, error_output_format: TypeLiteral["python", "cmd", "json"] = "python"
+) -> str | None:
     if error_output_format == "python":
         raise error
 
@@ -417,17 +429,21 @@ def return_error(error, error_output_format: TypeLiteral["python", "cmd", "json"
         error_body = str(error)
 
     if error_output_format == "json":
-        return json.dumps({
-            "error": error_message,
-            "message": error_body,
-        })
+        return json.dumps(
+            {
+                "error": error_message,
+                "message": error_body,
+            }
+        )
     elif error_output_format == "cmd":
         print(f"ERROR: {error_message}")
         print(error_body)
-        return
+    return None
 
 
-def format_shacl_error(error_graph: Graph, output_format: TypeLiteral["python", "cmd", "json"] = "python") -> Graph|str|list:
+def format_shacl_error(
+    error_graph: Graph, output_format: TypeLiteral["python", "cmd", "json"] = "python"
+) -> Graph | str | list:
     if output_format == "python":
         return error_graph
     else:

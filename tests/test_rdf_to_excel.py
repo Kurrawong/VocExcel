@@ -6,7 +6,7 @@ from openpyxl.workbook import Workbook
 from rdflib import SDO, SKOS, Literal, URIRef
 
 from vocexcel.convert import excel_to_rdf, rdf_to_excel
-from vocexcel.utils import STATUSES, load_workbook, ShaclValidationError
+from vocexcel.utils import STATUSES, ShaclValidationError, load_workbook
 
 
 def test_basic_085():
@@ -83,9 +83,14 @@ def test_error_responses(capsys):
         rdf_to_excel(RDF_FILE, output_file=XL_FILE.with_suffix(".xlsz"))  # 'python'
 
     rdf_to_excel(RDF_FILE, output_file=XL_FILE.with_suffix(".xlsz"), error_format="cmd")
-    assert "If specifying an output_file, it must end with .xlsx" in capsys.readouterr().out
+    assert (
+        "If specifying an output_file, it must end with .xlsx"
+        in capsys.readouterr().out
+    )
 
-    j = rdf_to_excel(RDF_FILE, output_file=XL_FILE.with_suffix(".xlsz"), error_format="json")
+    j = rdf_to_excel(
+        RDF_FILE, output_file=XL_FILE.with_suffix(".xlsz"), error_format="json"
+    )
     assert "If specifying an output_file, it must end with .xlsx" in j
     p = json.loads(j)
     assert "If specifying an output_file, it must end with .xlsx" in p["message"]
