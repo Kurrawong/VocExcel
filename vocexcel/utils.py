@@ -46,6 +46,8 @@ KNOWN_TEMPLATE_VERSIONS = [
     "0.8.5",
     "0.8.5.GA",
     "0.8.12",
+    "0.9.0",
+    "0.9.0.GA"
 ]
 LATEST_TEMPLATE = KNOWN_TEMPLATE_VERSIONS[-1]
 

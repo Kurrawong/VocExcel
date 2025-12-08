@@ -25,7 +25,7 @@ Use one Excel workbook per vocabulary.
 
 ### Latest Template
 
-* ***vocexcel/templates/VocExcel-template-0812.xlsx***
+* ***vocexcel/templates/VocExcel-template-090.xlsx***
 
 Unless you have a good reason to do something different, please use the latest version of the template.
 
@@ -130,7 +130,7 @@ This code is licensed using the BSD 3-Clause. See the _LICENSE_ for the deed. No
 ## Contact
 
 ***Commercial support***:\
-https://docs.kurrawong.ai/products/tools/vocexcel/\
+https://docs.kurrawong.ai/products/tools/vocexcel/ \
 info@kurrawong.ai
 
 **Lead Developer**:\
@@ -141,14 +141,11 @@ nick@kurrawong.ai
 
 ## Release Procedure
 
-* update version numbers
-  * pyprojects.toml
-  * vocexcel/__init__.py
-* update ref to latest template, if changed, in README.adoc
-* reproduce README.md
-  * `uvx --from Pydowndoc-bin -- downdoc README.adoc -o README.md`
-* add a Git tag matching the version number
+* update version number in pyprojects.toml
+* update ref to latest template, if changed, in README.md
+* Git commit all changes
   * push to GitHub: `git push`
+* add a Git tag matching the version number
   * push tags to GitHub: `git push --tags`
 * build: `uv build`
 * publish to PyPI: `uv publis -u __token__ -p {TOKEN}`

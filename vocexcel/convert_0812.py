@@ -213,7 +213,7 @@ def extract_collections(
         g.add((iri, SKOS.definition, Literal(definition, lang="en")))
 
         if members is not None:
-            for n in split_and_tidy_to_iris(members, prefixes, cs_iri):
+            for n in split_and_tidy_to_iris(members, prefixes, cs_iri + "/"):
                 g.add((iri, SKOS.member, n))
 
         if history_note is not None:
@@ -302,7 +302,7 @@ def extract_additions_concept_properties(
 def excel_to_rdf(
     wb: Workbook,
     output_file: Optional[Path] = None,
-    template_version: str = "0.8.5",
+    template_version: str = "0.9.0",
     output_format: TypeLiteral[
         "graph",
         "rdf",
@@ -336,7 +336,7 @@ def excel_to_rdf(
             )
             return return_error(error, error_format)
 
-    if template_version not in ["0.8.12"]:
+    if template_version not in ["0.8.12", "0.9.0", "0.9.0.GA"]:
         error = ValueError(
             f"This converter can only handle templates with versions 0.8.x or 0.8.x.GA, not {template_version}"
         )

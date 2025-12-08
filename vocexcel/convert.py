@@ -100,7 +100,7 @@ def excel_to_rdf(
         )
         return return_error(error, error_format)
 
-    if actual_template_version in ["0.8.12"]:
+    if actual_template_version in ["0.8.12", "0.9.0", "0.9.0.GA"]:
         return excel_to_rdf_0812(
             wb, output_file, actual_template_version, output_format, error_format
         )

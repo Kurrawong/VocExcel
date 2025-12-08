@@ -1,8 +1,8 @@
 import sys
 from pathlib import Path
 
-from rdflib import URIRef
-from rdflib.namespace import SDO, RDF, SKOS
+from rdflib import URIRef, Literal
+from rdflib.namespace import SDO, RDF, SKOS, XSD
 
 sys.path.append(str(Path(__file__).parent.parent.absolute() / "vocexcel"))
 from vocexcel import convert
@@ -11,8 +11,8 @@ TEMPLATES_DIR_PATH = Path(__file__).parent.parent.absolute() / "vocexcel/templat
 TESTS_DATA_DIR_PATH = Path(__file__).parent.absolute() / "data"
 
 
-def test_0812():
-    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "0812.xlsx", output_format="graph")
+def test_090():
+    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "090.xlsx", output_format="graph")
 
     assert (
         URIRef("http://example.com/voc/rock-types"),
@@ -46,10 +46,50 @@ def test_0812():
         SKOS.Concept,
     ) in g
 
+    assert (
+        URIRef("http://example.com/voc/rock-types/marble"),
+        SDO.status,
+        URIRef("https://linked.data.gov.au/def/reg-statuses/experimental"),
+    ) in g
 
-def test_0812_ntgs():
+    assert (
+        URIRef("http://example.com/voc/rock-types/m-types"),
+        SKOS.member,
+        URIRef("http://example.com/voc/rock-types/marble"),
+    ) in g
+
+
+def test_090GA():
+    g = convert.excel_to_rdf(TESTS_DATA_DIR_PATH / "090GA.xlsx", output_format="graph")
+
+    assert (
+        URIRef("http://example.com/voc/rock-types"),
+        SDO.status,
+        URIRef("https://linked.data.gov.au/def/reg-statuses/experimental"),
+    ) in g
+
+    assert (
+        URIRef("http://example.com/voc/rock-types/marble"),
+        SDO.status,
+        URIRef("https://linked.data.gov.au/def/reg-statuses/experimental"),
+    ) in g
+
+    assert (
+        URIRef("http://example.com/voc/rock-types/m-types"),
+        SKOS.member,
+        URIRef("http://example.com/voc/rock-types/marble"),
+    ) in g
+
+    assert (
+        URIRef("http://example.com/voc/rock-types"),
+        SDO.identifier,
+        Literal("https://pid.geoscience.gov.au/dataset/1234", datatype=XSD.anyURI),
+    ) in g
+
+
+def test_090_ntgs():
     g = convert.excel_to_rdf(
-        TESTS_DATA_DIR_PATH / "0812_ntgs.xlsx", output_format="graph"
+        TESTS_DATA_DIR_PATH / "090_ntgs.xlsx", output_format="graph"
     )
 
     assert (
@@ -75,3 +115,5 @@ def test_0812_ntgs():
         SKOS.inScheme,
         URIRef("https://linked.data.gov.au/def/cox-classification"),
     ) in g
+
+    # print(g.serialize(format="longturtle"))

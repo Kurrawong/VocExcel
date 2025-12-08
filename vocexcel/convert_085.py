@@ -82,7 +82,7 @@ def extract_concept_scheme(
     voc_der_mod = sheet["B15"].value
     themes = split_and_tidy_to_strings(sheet["B16"].value)
     status = sheet["B17"].value
-    if template_version == "0.8.5.GA":
+    if template_version in ["0.8.5.GA", "0.9.0.GA"]:
         catalogue_pid = sheet["B18"].value
 
     if iri_s is None:
@@ -163,7 +163,7 @@ def extract_concept_scheme(
         )
         return return_error(error, error_format)
 
-    if template_version == "0.8.5.GA":
+    if template_version in ["0.8.5.GA", "0.9.0.GA"]:
         if catalogue_pid is None or not str(catalogue_pid).startswith(
             "https://pid.geoscience.gov.au/"
         ):
@@ -217,7 +217,7 @@ def extract_concept_scheme(
     if status is not None:
         g.add((iri, SDO.status, URIRef(STATUSES[status])))
 
-    if template_version == "0.8.5.GA":
+    if template_version in ["0.8.5.GA", "0.9.0.GA"]:
         g.add((iri, SDO.identifier, Literal(catalogue_pid, datatype=XSD.anyURI)))
 
     bind_namespaces(g, prefixes)
