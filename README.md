@@ -147,5 +147,5 @@ nick@kurrawong.ai
   * push to GitHub: `git push`
 * add a Git tag matching the version number
   * push tags to GitHub: `git push --tags`
-* build: `uv build`
-* publish to PyPI: `uv publis -u __token__ -p {TOKEN}`
+* make a release on GitHub
+  * this will trigger a PyPI release
