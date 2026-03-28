@@ -1,6 +1,6 @@
 [project]
 name = "vocexcel"
-version = "0.9.0"
+version = "0.9.1"
 description = """Another Excel to RDF converter for SKOS vocabs, \
   but one that include profile-based validation of results."""
 authors = [
@@ -11,7 +11,7 @@ dependencies = [
     "openpyxl<4.0.0,>=3.0.9",
     "rdflib<8.0.0,>=7.5.0",
     "pydantic>2.11",
-    "pyshacl<1.0.0,>=0.18.1",
+    "pyshacl>=0.31.0",
     "dateutils<1.0.0,>=0.6.12",
     "colorama<1.0.0,>=0.4.4",
     "pytest<8.0.0,>=7.2.0",

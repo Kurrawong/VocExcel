@@ -760,4 +760,5 @@ def rdf_to_excel(
         if output_file is None:
             wb.save(str(rdf_file.with_suffix(".xlsx")))
         else:
+            print("Saving to given file")
             wb.save(str(output_file))
