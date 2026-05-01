@@ -25,7 +25,7 @@ Use one Excel workbook per vocabulary.
 
 ### Latest Template
 
-* ***vocexcel/templates/VocExcel-template-090.xlsx***
+* ***vocexcel/templates/VocExcel-template-100.xlsx***
 
 Unless you have a good reason to do something different, please use the latest version of the template.
 
@@ -141,6 +141,7 @@ nick@kurrawong.ai
 
 ## Release Procedure
 
+* task format
 * update version number in pyprojects.toml
 * update ref to latest template, if changed, in README.md
 * Git commit all changes
@@ -149,3 +150,4 @@ nick@kurrawong.ai
   * push tags to GitHub: `git push --tags`
 * make a release on GitHub
   * this will trigger a PyPI release
+* do post release version number update

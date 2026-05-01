@@ -9,21 +9,25 @@ from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import RDF, RDFS, SDO, SKOS, XSD
 
 from vocexcel.convert_085 import (
-    extract_prefixes as extract_prefixes_085,
     extract_concept_scheme as extract_concept_scheme_085,
+)
+from vocexcel.convert_085 import (
+    extract_prefixes as extract_prefixes_085,
+)
+from vocexcel.convert_085 import (
     rdf_to_excel as rdf_to_excel_085,
 )
 from vocexcel.utils import (
+    RDF_FILE_ENDINGS,
     STATUSES,
     ConversionError,
+    ShaclValidationError,
+    add_top_concepts,
     bind_namespaces,
     make_iri,
     return_error,
     split_and_tidy_to_iris,
     split_and_tidy_to_strings,
-    add_top_concepts,
-    RDF_FILE_ENDINGS,
-    ShaclValidationError,
 )
 
 DATAROLES = Namespace("https://linked.data.gov.au/def/data-roles/")
@@ -282,7 +286,9 @@ def extract_additions_concept_properties(
         if notation_s is not None:
             notations = split_and_tidy_to_strings(notation_s)
             if notation_type_s is not None:
-                notation_types = split_and_tidy_to_iris(notation_type_s, prefixes, cs_iri)
+                notation_types = split_and_tidy_to_iris(
+                    notation_type_s, prefixes, cs_iri
+                )
             else:
                 notation_types = [XSD.token for x in notations]
 

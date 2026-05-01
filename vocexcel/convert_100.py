@@ -7,13 +7,9 @@ from openpyxl.styles import Alignment, Font
 from openpyxl.workbook.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from pyshacl import validate as shacl_validate
-from rdflib import DCTERMS, BNode, Graph, Literal, Namespace, URIRef
-from rdflib.namespace import OWL, PROV, RDF, RDFS, SDO, SKOS, XSD
+from rdflib import BNode, Graph, Literal, Namespace, URIRef
+from rdflib.namespace import DCTERMS, OWL, PROV, RDF, RDFS, SDO, SKOS, XSD
 
-from vocexcel.convert_070 import (
-    extract_additions_concept_properties as extract_additions_concept_properties_070,
-)
-from vocexcel.convert_070 import extract_collections as extract_collections_070
 from vocexcel.utils import (
     RDF_FILE_ENDINGS,
     STATUSES,
@@ -23,6 +19,7 @@ from vocexcel.utils import (
     add_top_concepts,
     bind_namespaces,
     fill_cell_with_list_of_curies,
+    get_lookup,
     load_workbook,
     make_agent,
     make_iri,
@@ -64,8 +61,9 @@ def extract_prefixes(
 def extract_concept_scheme(
     sheet: Worksheet,
     prefixes,
-    template_version="0.8.5",
+    template_version="1.0.0",
     error_format: TypeLiteral["python", "cmd", "json"] = "python",
+    themes_list: [] = None,
 ) -> tuple[Graph, str]:
     iri_s = sheet["B3"].value
     title = sheet["B4"].value
@@ -82,7 +80,7 @@ def extract_concept_scheme(
     voc_der_mod = sheet["B15"].value
     themes = split_and_tidy_to_strings(sheet["B16"].value)
     status = sheet["B17"].value
-    if template_version in ["0.8.5.GA", "0.9.0.GA"]:
+    if template_version in ["1.0.0.GA", "1.0.0.GA"]:
         catalogue_pid = sheet["B18"].value
 
     if iri_s is None:
@@ -155,6 +153,13 @@ def extract_concept_scheme(
         derived_from = make_iri(derived_from, prefixes)
 
     # keywords
+    if template_version == "1.0.0.GA":
+        for theme in themes:
+            if theme not in themes_list:
+                error = ConversionError(
+                    f"All GA vocabs must have a single theme taken from the Data Themes lookup list in the Lookups sheet"
+                )
+                return return_error(error, error_format)
 
     if status is not None and status not in STATUSES:
         error = ConversionError(
@@ -163,12 +168,12 @@ def extract_concept_scheme(
         )
         return return_error(error, error_format)
 
-    if template_version in ["0.8.5.GA", "0.9.0.GA"]:
+    if template_version in ["1.0.0.GA", "1.0.0.GA"]:
         if catalogue_pid is None or not str(catalogue_pid).startswith(
             "https://pid.geoscience.gov.au/"
         ):
             error = ConversionError(
-                "All GA vocabularies must have an eCat ID starting https://pid.geoscience.gov.au/dataset/ga..., assigned in the Concept Scheme metadata"
+                "All GA vocabularies must have an eCat ID starting https://pid.geoscience.gov.au/dataset/ga/..., assigned in the Concept Scheme metadata"
             )
             return return_error(error, error_format)
 
@@ -207,18 +212,35 @@ def extract_concept_scheme(
         g.add((qd, PROV.hadRole, URIRef(VOCDERMODS[voc_der_mod])))
 
     if themes is not None:
-        for theme in themes:
-            try:
-                theme = make_iri(theme, prefixes)
-            except ConversionError:
-                theme = Literal(theme)
-            g.add((iri, SDO.keywords, theme))
+        if template_version == "1.0.0.GA":
+            for theme in themes:
+                theme_iri = URIRef(
+                    "https://pid.geoscience.gov.au/def/voc/ga/DataThemes/"
+                    + theme.replace(" ", "_")
+                )
+                g.add((iri, SDO.keywords, theme_iri))
+        else:
+            for theme in themes:
+                try:
+                    theme = make_iri(theme, prefixes)
+                except ConversionError:
+                    theme = Literal(theme)
+                g.add((iri, SDO.keywords, theme))
 
     if status is not None:
         g.add((iri, SDO.status, URIRef(STATUSES[status])))
 
-    if template_version in ["0.8.5.GA", "0.9.0.GA"]:
-        g.add((iri, SDO.identifier, Literal(catalogue_pid, datatype=XSD.anyURI)))
+    if template_version in ["1.0.0.GA"]:
+        g.add(
+            (
+                iri,
+                SDO.identifier,
+                Literal(
+                    catalogue_pid,
+                    datatype=URIRef("https://pid.geoscience.gov.au/def/voc/ga/eCatID"),
+                ),
+            )
+        )
 
     bind_namespaces(g, prefixes)
     g.bind("", Namespace(str(iri) + "/"))
@@ -239,7 +261,7 @@ def extract_concepts(
         pref_label = sheet[f"B{i}"].value
         definition = sheet[f"C{i}"].value
         alt_labels = sheet[f"D{i}"].value
-        narrower = sheet[f"E{i}"].value
+        broader = sheet[f"E{i}"].value
         history_note = sheet[f"F{i}"].value
         citation = sheet[f"G{i}"].value
         is_defined_by = sheet[f"H{i}"].value
@@ -252,7 +274,7 @@ def extract_concepts(
         if iri_s is None:
             break
 
-        iri = make_iri(iri_s, prefixes)
+        iri = make_iri(iri_s, prefixes, namespace=cs_iri + "/")
 
         if pref_label is None:
             error = ConversionError(
@@ -312,10 +334,10 @@ def extract_concepts(
             for al in split_and_tidy_to_strings(alt_labels):
                 g.add((iri, SKOS.altLabel, Literal(al, lang="en")))
 
-        if narrower is not None:
-            for n in split_and_tidy_to_iris(narrower, prefixes):
-                g.add((iri, SKOS.narrower, n))
-                g.add((n, SKOS.broader, iri))
+        if broader is not None:
+            for n in split_and_tidy_to_iris(broader, prefixes, cs_iri + "/"):
+                g.add((iri, SKOS.broader, n))
+                g.add((n, SKOS.narrower, iri))
 
         if history_note is not None:
             g.add((iri, SKOS.historyNote, Literal(history_note.strip())))
@@ -357,26 +379,146 @@ def extract_collections(
     cs_iri,
     error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ):
-    return extract_collections_070(sheet, prefixes, cs_iri)
+    g = Graph(bind_namespaces="rdflib")
+    i = 4
+    while True:
+        # get values
+        iri_s = sheet[f"A{i}"].value
+        pref_label = sheet[f"B{i}"].value
+        definition = sheet[f"C{i}"].value
+        members = sheet[f"D{i}"].value
+        history_note = sheet[f"E{i}"].value
+
+        # check values
+        if iri_s is None:
+            break
+
+        iri = make_iri(iri_s, prefixes, namespace=cs_iri + "/")
+
+        if pref_label is None:
+            raise ConversionError(
+                f"You must provide a Preferred Label for Collection {iri_s}"
+            )
+
+        if definition is None:
+            raise ConversionError(
+                f"You must provide a Definition for Collection {iri_s}"
+            )
+
+        # create Graph
+        g.add((iri, RDF.type, SKOS.Collection))
+        g.add((iri, SKOS.inScheme, cs_iri))
+        g.add((iri, RDFS.isDefinedBy, cs_iri))
+        if str(iri).startswith(str(cs_iri)):
+            g.add((iri, RDFS.isDefinedBy, cs_iri))
+        g.add((iri, SKOS.prefLabel, Literal(pref_label, lang="en")))
+        g.add((iri, SKOS.definition, Literal(definition, lang="en")))
+
+        if members is not None:
+            for n in split_and_tidy_to_iris(members, prefixes, cs_iri + "/"):
+                g.add((iri, SKOS.member, n))
+
+        if history_note is not None:
+            g.add((iri, SKOS.historyNote, Literal(history_note.strip())))
+
+        i += 1
+
+    bind_namespaces(g, prefixes)
+    return g
 
 
 def extract_additions_concept_properties(
     sheet: Worksheet,
     prefixes,
+    cs_iri,
     error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ):
-    return extract_additions_concept_properties_070(sheet, prefixes)
+    g = Graph(bind_namespaces="rdflib")
+    i = 4
+    while True:
+        # get values
+        iri_s = sheet[f"A{i}"].value
+        related_s = sheet[f"B{i}"].value
+        close_s = sheet[f"C{i}"].value
+        exact_s = sheet[f"D{i}"].value
+        narrow_s = sheet[f"E{i}"].value
+        broad_s = sheet[f"F{i}"].value
+        notation_s = sheet[f"G{i}"].value
+        notation_type_s = sheet[f"H{i}"].value
+        broader = sheet[f"I{i}"].value
+
+        # check values
+        if iri_s is None:
+            break
+
+        i += 1
+
+        # ignore example Concepts
+        if iri_s in [
+            "http://example.com/geology",
+        ]:
+            continue
+
+        # create Graph
+        iri = make_iri(iri_s, prefixes, namespace=cs_iri + "/")
+
+        if related_s is not None:
+            related = make_iri(related_s, prefixes, namespace=cs_iri + "/")
+            g.add((iri, SKOS.relatedMatch, related))
+
+        if close_s is not None:
+            close = make_iri(close_s, prefixes, namespace=cs_iri + "/")
+            g.add((iri, SKOS.closeMatch, close))
+
+        if exact_s is not None:
+            exact = make_iri(exact_s, prefixes, namespace=cs_iri + "/")
+            g.add((iri, SKOS.exactMatch, exact))
+
+        if narrow_s is not None:
+            narrow = make_iri(narrow_s, prefixes, namespace=cs_iri + "/")
+            g.add((iri, SKOS.narrowMatch, narrow))
+
+        if broad_s is not None:
+            broad = make_iri(broad_s, prefixes, namespace=cs_iri + "/")
+            g.add((iri, SKOS.broadMatch, broad))
+
+        if notation_s is not None:
+            notations = split_and_tidy_to_strings(notation_s)
+            if notation_type_s is not None:
+                notation_types = split_and_tidy_to_iris(
+                    notation_type_s, prefixes, cs_iri
+                )
+            else:
+                notation_types = [XSD.token for x in notations]
+
+            for j, notation in enumerate(notations):
+                g.add(
+                    (
+                        iri,
+                        SKOS.notation,
+                        Literal(notation, datatype=notation_types[j]),
+                    )
+                )
+
+        if broader is not None:
+            b = make_iri(broader, prefixes, namespace=cs_iri + "/")
+            g.add((iri, SKOS.broader, b))
+            g.add((b, SKOS.narrower, iri))
+
+    bind_namespaces(g, prefixes)
+    return g
 
 
 def excel_to_rdf(
     wb: Workbook,
     output_file: Optional[Path] = None,
-    template_version: str = "0.8.5",
+    template_version: str = "1.0.0",
     output_format: TypeLiteral[
         "graph",
         "rdf",
     ] = "rdf",
     error_format: TypeLiteral["python", "cmd", "json"] = "python",
+    themes_list: [] = None,
 ):
     """Converts an Excel workbook file to RDF
 
@@ -405,7 +547,7 @@ def excel_to_rdf(
             )
             return return_error(error, error_format)
 
-    if template_version not in ["0.8.5", "0.8.5.GA"]:
+    if template_version not in ["1.0.0", "1.0.0.GA"]:
         error = ValueError(
             f"This converter can only handle templates with versions 0.8.x or 0.8.x.GA, not {template_version}"
         )
@@ -429,8 +571,11 @@ def excel_to_rdf(
     if not isinstance(prefixes, dict):
         return prefixes
 
+    if template_version in ["1.0.0.GA"]:
+        themes_list = get_lookup(wb["Lookups"], "C", 2)
+
     x = extract_concept_scheme(
-        wb["Concept Scheme"], prefixes, template_version, error_format
+        wb["Concept Scheme"], prefixes, template_version, error_format, themes_list
     )
     if isinstance(x, tuple):
         cs, cs_iri = x
@@ -446,7 +591,7 @@ def excel_to_rdf(
         return cols
 
     extra = extract_additions_concept_properties(
-        wb["Additional Concept Properties"], prefixes
+        wb["Additional Concept Properties"], prefixes, cs_iri
     )
     if not isinstance(extra, Graph):
         return extra
@@ -504,9 +649,9 @@ def rdf_to_excel(
             error = ValueError("If specifying an output_file, it must end with .xlsx")
             return return_error(error, error_format)
 
-    if template_version not in ["0.8.5", "0.8.5.GA"]:
+    if template_version not in ["1.0.0", "1.0.0.GA"]:
         error = ValueError(
-            f"This converter can only handle templates with versions 0.8.5 or 0.8.5.GA, not {template_version}"
+            f"This converter can only handle templates with versions 1.0.0 or 1.0.0.GA, not {template_version}"
         )
         return return_error(error, error_format)
 

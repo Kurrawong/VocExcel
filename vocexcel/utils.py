@@ -47,7 +47,9 @@ KNOWN_TEMPLATE_VERSIONS = [
     "0.8.5.GA",
     "0.8.12",
     "0.9.0",
-    "0.9.0.GA"
+    "0.9.0.GA",
+    "1.0.0",
+    "1.0.0.GA",
 ]
 LATEST_TEMPLATE = KNOWN_TEMPLATE_VERSIONS[-1]
 
@@ -152,9 +154,7 @@ def split_and_tidy_to_strings(s: str):
 
 
 def split_and_tidy_to_iris(s: str, prefixes, cs_iri=None):
-    return [
-        make_iri(ss, prefixes, cs_iri) for ss in split_and_tidy_to_strings(s)
-    ]
+    return [make_iri(ss, prefixes, cs_iri) for ss in split_and_tidy_to_strings(s)]
 
 
 def string_is_http_iri(s: str) -> Tuple[bool, str]:
@@ -470,3 +470,14 @@ def format_shacl_error(
             return s
         else:  # json
             return individual_results
+
+
+def get_lookup(sheet: Worksheet, column_letter, starting_row):
+    lookup = []
+    i = starting_row
+    while True:
+        v = sheet[f"{column_letter}{i}"].value
+        if v is None:
+            return lookup
+        lookup.append(v)
+        i += 1
