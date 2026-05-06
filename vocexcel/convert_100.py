@@ -618,7 +618,7 @@ def excel_to_rdf(
 def rdf_to_excel(
     rdf_file: Path,
     output_file: Optional[Path] = None,
-    template_version="0.8.5",
+    template_version="1.0.0",
     output_format: TypeLiteral["blob", "file"] = "file",
     error_format: TypeLiteral["python", "cmd", "json"] = "python",
 ):
@@ -676,6 +676,7 @@ def rdf_to_excel(
         return return_error(e, error_format)
 
     g.bind("ex", "http://example.com/")
+    g.bind("gatheme", "https://pid.geoscience.gov.au/def/voc/ga/DataThemes/")
     ns = g.namespace_manager
 
     # validate the RDF file
@@ -686,9 +687,9 @@ def rdf_to_excel(
 
     # load the template
     fn = (
-        "VocExcel-template-085-GA.xlsx"
-        if template_version == "0.8.5.GA"
-        else "VocExcel-template-085.xlsx"
+        "VocExcel-template-100-GA.xlsx"
+        if template_version == "1.0.0.GA"
+        else "VocExcel-template-100.xlsx"
     )
     wb = load_workbook(Path(__file__).parent / "templates" / fn)
 
@@ -738,14 +739,16 @@ def rdf_to_excel(
                     if v == str(o2):
                         ws["B15"] = k
     ws["B16"] = ", ".join(
-        [str(x) for x in g.objects(subject=cs_iri, predicate=SDO.keywords)]
+        [ns.curie(x) for x in g.objects(subject=cs_iri, predicate=SDO.keywords)]
     )
+    ws[f"B16"].font = Font(size=14)
     ws["B17"] = str(g.value(subject=cs_iri, predicate=SDO.status)).split("/")[-1]
-    if template_version == "0.8.5.GA":
+    if template_version == "1.0.0.GA":
         ws["B18"] = str(g.value(subject=cs_iri, predicate=SDO.identifier))
 
     # Concepts
     ws = wb["Concepts"]
+    extra_broaders = {}
     r = 4
     cs = sorted(list(g.subjects(predicate=RDF.type, object=SKOS.Concept)))
     for c in cs:
@@ -764,11 +767,14 @@ def rdf_to_excel(
 
         for s, o in g.subject_objects(SKOS.broader):
             g.add((o, SKOS.narrower, s))
-        narrowers = []
-        for narrower in g.objects(subject=c, predicate=SKOS.narrower):
-            narrowers.append(narrower)
-        ws[f"E{r}"] = ",\n".join([ns.curie(x) for x in narrowers])
-        ws[f"E{r}"].font = Font(size=14)
+        broaders = []
+        for broader in g.objects(subject=c, predicate=SKOS.broader):
+            broaders.append(broader)
+        if len(broaders) > 0:
+            xl_hyperlink(ws[f"E{r}"], ns.curie(broaders[0]))
+            ws[f"E{r}"].font = Font(size=14)
+            if len(broaders) > 1:
+                extra_broaders[c] = broaders[1:]
 
         hn = g.value(subject=c, predicate=SKOS.historyNote)
         if hn is not None:
@@ -834,6 +840,15 @@ def rdf_to_excel(
             ws[f"G{r}"].font = Font(size=14)
             ws[f"H{r}"] = ",\n".join(datatypes)
             ws[f"H{r}"].font = Font(size=14)
+
+            r += 1
+
+    # remaining Concepts with 2+ broaders
+    ws = wb["Additional Concept Properties"]
+    for c, bs in extra_broaders.items():
+        for b in bs:
+            xl_hyperlink(ws[f"A{r}"], ns.curie(c))
+            xl_hyperlink(ws[f"I{r}"], ns.curie(b))
 
             r += 1
 
