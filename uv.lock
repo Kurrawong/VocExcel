@@ -1160,7 +1160,7 @@ wheels = [
 
 [[package]]
 name = "vocexcel"
-version = "1.0.3a0"
+version = "1.0.4a0"
 source = { editable = "." }
 dependencies = [
     { name = "colorama" },
@@ -1203,8 +1203,8 @@ requires-dist = [
     { name = "pydantic", specifier = ">2.11" },
     { name = "pyshacl", specifier = ">=0.31.0" },
     { name = "python-multipart", specifier = ">=0.0.20" },
-    { name = "rdflib", specifier = ">=7.5.0,<8.0.0" },
-    { name = "setuptools", specifier = ">=78.1.1" },
+    { name = "rdflib", specifier = ">=7.6.0,<8.0.0" },
+    { name = "setuptools", specifier = ">=70.0.0" },
 ]
 
 [package.metadata.requires-dev]
