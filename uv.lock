@@ -1160,10 +1160,9 @@ wheels = [
 
 [[package]]
 name = "vocexcel"
-version = "1.0.2a0"
+version = "1.0.3a0"
 source = { editable = "." }
 dependencies = [
-    { name = "black" },
     { name = "colorama" },
     { name = "dateutils" },
     { name = "hatch" },
@@ -1173,7 +1172,6 @@ dependencies = [
     { name = "pipdeptree" },
     { name = "pydantic" },
     { name = "pyshacl" },
-    { name = "pytest" },
     { name = "python-multipart" },
     { name = "rdflib" },
     { name = "setuptools" },
@@ -1181,7 +1179,9 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "black" },
     { name = "httpx" },
+    { name = "pytest" },
     { name = "python-dotenv" },
     { name = "ruff" },
 ]
@@ -1193,7 +1193,6 @@ web = [
 
 [package.metadata]
 requires-dist = [
-    { name = "black", specifier = ">=26.3.1" },
     { name = "colorama", specifier = ">=0.4.4,<1.0.0" },
     { name = "dateutils", specifier = ">=0.6.12,<1.0.0" },
     { name = "hatch", specifier = ">=1.16.1" },
@@ -1203,7 +1202,6 @@ requires-dist = [
     { name = "pipdeptree", specifier = ">=2.3.3,<3.0.0" },
     { name = "pydantic", specifier = ">2.11" },
     { name = "pyshacl", specifier = ">=0.31.0" },
-    { name = "pytest", specifier = ">=9.0.3" },
     { name = "python-multipart", specifier = ">=0.0.20" },
     { name = "rdflib", specifier = ">=7.5.0,<8.0.0" },
     { name = "setuptools", specifier = ">=78.1.1" },
@@ -1211,7 +1209,9 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "black", specifier = ">=26.3.1" },
     { name = "httpx", specifier = ">=0.24.1,<1.0.0" },
+    { name = "pytest", specifier = ">=9.0.3" },
     { name = "python-dotenv", specifier = ">=1.0.0,<2.0.0" },
     { name = "ruff", specifier = ">=0.0.277,<1.0.0" },
 ]
