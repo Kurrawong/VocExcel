@@ -1,6 +1,6 @@
 [project]
 name = "vocexcel"
-version = "1.0.3"
+version = "1.0.4a"
 description = """Another Excel to RDF converter for SKOS vocabs, \
   but one that include profile-based validation of results."""
 authors = [
